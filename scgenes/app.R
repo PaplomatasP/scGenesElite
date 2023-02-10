@@ -240,7 +240,9 @@ server <- function(input, output) {
                         res = 300,
                         units = "in"
                       )
+                  pdf(file = NULL)
                   ggsave(file, plot = plotInput(), device = device)
+                  dev.off()
                 }
               )
             
