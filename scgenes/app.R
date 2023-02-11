@@ -240,9 +240,9 @@ server <- function(input, output) {
                         res = 300,
                         units = "in"
                       )
-                  #pdf(file = NULL)
-                  ggsave(file, plot = plotInput(), device = device)
-                  #dev.off()
+                  pdf(file = NULL)
+                  ggsave(file)
+                  dev.off()
                 }
               )
             
@@ -438,7 +438,9 @@ server <- function(input, output) {
                                      res = 300,
                                      units = "in"
                                    )
-                               ggsave(file, plot = plotInput(), device = device)
+                               pdf(file = NULL)
+                               ggsave(file)
+                               dev.off()
                              }
                            )
                          
