@@ -2,7 +2,7 @@ source("ui.R", local = TRUE)
 # Define server logic to read selected file ----
 server <- function(input, output) { 
   #  shinyjs::runjs("$('navbarPage > *').css('zoom', '10%');")
-  
+  pdf(NULL)
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
   
   
@@ -240,9 +240,9 @@ server <- function(input, output) {
                         res = 300,
                         units = "in"
                       )
-                  pdf(file = NULL)
+                  pdf(NULL) 
                   ggsave(file)
-                  dev.off()
+                
                 }
               )
             
@@ -440,7 +440,7 @@ server <- function(input, output) {
                                    )
                                pdf(file = NULL)
                                ggsave(file)
-                               dev.off()
+                               
                              }
                            )
                          
