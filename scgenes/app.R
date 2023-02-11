@@ -226,11 +226,13 @@ server <- function(input, output) {
             
             #Download button for the images and dataset from the enrichment results.
             output$GP <-
+              pdf(file = NULL)
               downloadHandler(
                 filename = function() {
                   paste("Enrichment_Analysis", '.png', sep = '')
                 },
                 content = function(file) {
+                  pdf(file = NULL)
                   device <-
                     function(..., width, height)
                       grDevices::png(
