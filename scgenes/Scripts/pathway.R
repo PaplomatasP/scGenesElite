@@ -15,7 +15,7 @@ plot_pathview <- function(..., save_image = FALSE)
   grid::grid.raster(img)
  print("here")
   # Optionally remove the image file if save_image is set to FALSE
-  if(save_image == FALSE) file.remove(img_file)
+ # if(save_image == FALSE) file.remove(img_file)
 }
 # 
 # plot_pathview <- function(..., save_image = FALSE)
