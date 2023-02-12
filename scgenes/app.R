@@ -221,7 +221,10 @@ server <- function(input, output) {
             }
             
             plotInput <- reactive({
+              pdf(file = NULL)
               mp <- marrangeGrob(BBP, nrow = 6, ncol = 3)
+              pdf(file = NULL)
+             
             })
             
             #Download button for the images and dataset from the enrichment results.
@@ -412,7 +415,10 @@ server <- function(input, output) {
                            
                          })
                          plotInput <- reactive({
+                           pdf(file = NULL)
                            mp <- marrangeGrob(BBP, nrow = 3, ncol = 1)
+                           pdf(file = NULL)
+                          
                          })
                          
                          output$GP <- downloadHandler(

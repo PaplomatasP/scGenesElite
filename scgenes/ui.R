@@ -1035,6 +1035,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
                  actionButton("click1", "Enrichment Analysis ")),
           column(
             7,
+            useShinyjs(),
             downloadButton("GP", "Export Plots"),
             downloadButton("GT", "Export Tables"),
           ),
