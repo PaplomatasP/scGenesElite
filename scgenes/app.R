@@ -421,6 +421,8 @@ server <- function(input, output) {
                           
                          })
                          
+                         #Download button for the images and dataset from the enrichment results.
+                         
                          output$GP <- downloadHandler(
                            filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
                            content = function(file) {
@@ -504,10 +506,14 @@ server <- function(input, output) {
   
   
   output$KEGG <- renderDT({
-    PathsData
-    
-    return(PathsData)
+    datatable(PathsData, options = list(
+      scrollY = "200px",
+      scrollCollapse = TRUE,
+      pagination = FALSE,
+      pageLength = nrow(PathsData)
+    ))
   })
+  
   
   # connect the go button to the active function by clicking .
   text1 = eventReactive(input$click2, {
