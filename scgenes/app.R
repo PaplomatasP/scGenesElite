@@ -221,9 +221,9 @@ server <- function(input, output) {
             }
             
             plotInput <- reactive({
-              pdf(file = NULL)
+            
               mp <- marrangeGrob(BBP, nrow = 6, ncol = 3)
-              pdf(file = NULL)
+              
              
             })
             
@@ -415,9 +415,9 @@ server <- function(input, output) {
                            
                          })
                          plotInput <- reactive({
-                           pdf(file = NULL)
+
                            mp <- marrangeGrob(BBP, nrow = 3, ncol = 1)
-                           pdf(file = NULL)
+                        
                           
                          })
                          
