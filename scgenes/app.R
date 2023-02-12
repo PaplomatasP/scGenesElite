@@ -536,7 +536,7 @@ server <- function(input, output) {
       }
       
       # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
-      ScaledData <- iGlexikon(iG, input$GENEid)
+      ScaledData <<- iGlexikon(iG, input$GENEid)
       plot_pathview(
         gene.data = ScaledData  ,
         pathway.id = input$inText,
