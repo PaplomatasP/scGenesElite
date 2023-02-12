@@ -4,21 +4,16 @@ plot_pathview <- function(..., save_image = FALSE) {
   msg <- grep("image file", msg, value = T)
   filename <- sapply(strsplit(msg, " "), function(x) x[length(x)])
   
-  cat("filename:", filename, "\n")
-  
   # Check if the file exists
   full_file_path <- file.path(getwd(), filename)
   if (length(filename) == 0) {
     stop("The filename is not found.")
   }
   
-  
   # Save the image file to a temporary directory on the server
   tmp_dir <- tempdir()
   img_file <- file.path(tmp_dir, filename)
   file.copy(filename, img_file)
-  
-  cat("img_file:", img_file, "\n")
   
   # Use the full path to the image file
   img <- png::readPNG(img_file)
