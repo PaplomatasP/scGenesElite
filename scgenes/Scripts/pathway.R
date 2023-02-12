@@ -7,7 +7,7 @@ plot_pathview <- function(..., save_image = FALSE) {
   cat("filename:", filename, "\n")
   
   # Check if the file exists
-  if (!file.exists(filename)) {
+  if (!exists(filename)) {
     stop("File does not exist:", filename)
   }
   
