@@ -7,8 +7,9 @@ plot_pathview <- function(..., save_image = FALSE) {
   cat("filename:", filename, "\n")
   
   # Check if the file exists
-  if (!exists(filename)) {
-    stop("File does not exist:", filename)
+  full_file_path <- file.path(getwd(), filename)
+  if (!file.exists(full_file_path)) {
+    stop("File does not exist:", full_file_path)
   }
   
   # Save the image file to a temporary directory on the server
