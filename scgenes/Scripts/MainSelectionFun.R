@@ -3,7 +3,7 @@
 MethodData = function() {
   #check if the input data are rds. and do the all process ........
   if (length(input$file1) == 0) {
-    print("hi")
+
     
     
     if (input$GENEid == "EnsemblGenes") {
