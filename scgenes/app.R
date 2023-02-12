@@ -225,28 +225,18 @@ server <- function(input, output) {
             })
             
             #Download button for the images and dataset from the enrichment results.
-            output$GP <-
-              pdf(file = NULL)
-              downloadHandler(
-                filename = function() {
-                  paste("Enrichment_Analysis", '.png', sep = '')
-                },
-                content = function(file) {
-                  pdf(file = NULL)
-                  device <-
-                    function(..., width, height)
-                      grDevices::png(
-                        ...,
-                        width = 18,
-                        height = 19,
-                        res = 300,
-                        units = "in"
-                      )
-                  pdf(NULL) 
-                  ggsave(file)
-                
-                }
-              )
+            output$GP <- downloadHandler(
+              filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
+              content = function(file) {
+                filePath <- file.path(tempdir(), "Enrichment_Analysis.png")
+                device <- function(..., width, height) grDevices::png(filePath, width = 18, height = 19, res = 300, units = "in")
+                ggsave(filePath, plot = plotInput(), device = device)
+                file.copy(filePath, file)
+              }
+            )
+            
+            
+        #  })
             
             
             #Pre-processing of download objects.
@@ -425,26 +415,16 @@ server <- function(input, output) {
                            mp <- marrangeGrob(BBP, nrow = 3, ncol = 1)
                          })
                          
-                         output$GP <-
-                           downloadHandler(
-                             filename = function() {
-                               paste("Enrichment_Analysis", '.png', sep = '')
-                             },
-                             content = function(file) {
-                               device <-
-                                 function(..., width, height)
-                                   grDevices::png(
-                                     ...,
-                                     width = 12,
-                                     height = 16,
-                                     res = 300,
-                                     units = "in"
-                                   )
-                               pdf(file = NULL)
-                               ggsave(file)
-                               
-                             }
-                           )
+                         output$GP <- downloadHandler(
+                           filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
+                           content = function(file) {
+                             filePath <- file.path(tempdir(), "Enrichment_Analysis.png")
+                             device <- function(..., width, height) grDevices::png(filePath, width = 18, height = 19, res = 300, units = "in")
+                             ggsave(filePath, plot = plotInput(), device = device)
+                             file.copy(filePath, file)
+                           }
+                         )
+                         
                          
                          to_download <- reactiveValues(
                            Enrichment1 = if (length(enriched) >= 1) {
@@ -544,7 +524,7 @@ server <- function(input, output) {
       }
       
       # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
-      ScaledData <- iGlexikon(iG, input$GENEid)
+      ScaledData <<- iGlexikon(iG, input$GENEid)
       plot_pathview(
         gene.data = ScaledData  ,
         pathway.id = input$inText,
