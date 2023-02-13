@@ -1,9 +1,11 @@
 
 plot_pathview <- function(..., save_image = FALSE) {
+  print("i am inside to plot pathview")
+  
   msg <- capture.output(pathview::pathview(...), type = "message")
   msg <- grep("image file", msg, value = T)
   filename <- sapply(strsplit(msg, " "), function(x) x[length(x)])
-  
+  print(filename)
   # Check if the file exists
   full_file_path <- file.path(getwd(), filename)
   if (length(filename) == 0) {
