@@ -1101,7 +1101,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             width = 12,
             
             
-            plotOutput("KEGGmap", width = "90%", height = 500) ,
+            plotOutput("KEGGmap", width = "150%",height = 800) ,#, width = "100%", height = 500
             
             
           )

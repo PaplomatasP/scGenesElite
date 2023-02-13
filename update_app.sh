@@ -1,4 +1,6 @@
 #!/bin/bash
+#Change to the scGenesElite directory
+cd ~/scGenesElite
 
 # Check if the local copy of the application is up to date
 if ! git diff --quiet origin/master; then

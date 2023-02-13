@@ -2,7 +2,7 @@ source("ui.R", local = TRUE)
 # Define server logic to read selected file ----
 server <- function(input, output) { 
   #  shinyjs::runjs("$('navbarPage > *').css('zoom', '10%');")
-  pdf(NULL)
+
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
   
   
@@ -522,38 +522,29 @@ server <- function(input, output) {
   #doing the pre-process check for the Organismus and plot the pathaway.
   output$KEGGmap <- renderPlot({
     text1()
-    if (input$organismus == "Human") {
-      Species = "hsa"
+    if (input$organismus=="Human"){
+      Species="hsa"
       
     }
     else{
-      Species = "mmu"
+      Species="mmu"
     }
     withProgress(message = 'Please wait........', value = 0, {
-      {
-        incProgress(8 / 10)
+      {incProgress(8/10)
         Sys.sleep(0.10)
       }
       
-      # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
-      ScaledData <- iGlexikon(iG, input$GENEid)
-      plot_pathview(
-        gene.data = ScaledData  ,
-        pathway.id = input$inText,
-        species = Species ,
-        out.suffix = "",
-        kegg.native = T,
-        save_image = FALSE
-      )
       
-     
+      ScaledData<<-iGlexikon(iG,input$GENEid)
+      plot_pathview(gene.data =ScaledData  ,
+                    pathway.id = input$inText,
+                    species =Species ,
+                    out.suffix = "",
+                    kegg.native = T,
+                    save_image = FALSE)
       
-      # pathview(gene.data = ScaledData, pathway.id = input$inText,
-      #          species = Species)
-
       
-      {
-        incProgress(10 / 10)
+      {incProgress(10/10)
         Sys.sleep(0.10)
       }
       print("Fire")
