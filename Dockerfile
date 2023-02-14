@@ -12,3 +12,4 @@ COPY  git_pkg.R .
 RUN Rscript git_pkg.R
 
 COPY ./scgenes/. /srv/shiny-server/.
+RUN sudo chown -R shiny:shiny /srv/shiny-server/
