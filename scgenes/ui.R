@@ -112,13 +112,9 @@ ui <- #fluidPage(div(class = "tab-content",
     ),
     # App title ----
     tabPanel (
-      # div(tags$img(
-      #   src = "scGenesElite.jpg.png",
-      #   width = '300px',
-      #   height = '100px'
-      # ), style = "position:relative; left:550px;"),
+     
       
-        title = tags$img(src='scGenesElite.jpg.png', width = '230px', height = '65px'),
+        title = tags$img(src='scGenesElite.jpg.png', width = '200px', height = '80px'),
     
       
       sidebarLayout(
@@ -164,7 +160,7 @@ ui <- #fluidPage(div(class = "tab-content",
             class = "footer",
             p(
               a(href = "mailto:p.paplomatas@hotmail.com", "Feel free to contact us for any issue or question at p.paplomatas@hotmail.com", 
-                style = "color:white; text-align:center; font-size: 24px; "),
+                style = "color:white; text-align:center; font-size: 22px; "),
             )
           ),
           br(),
@@ -360,7 +356,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               "Keep High Variable Genes" = "Lightweight_Filter",
               "No Filter" = "Unselect"
             ),
-            selected = "Unselect",
+            selected = "Strict_Filter",
             inline = TRUE,
           ),
           #change the size
@@ -834,17 +830,20 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               "Number of genes:",
               
               min = 2,
-              max = 300,
+              max = 500,
               value = 100
             ),
           ),
-          
+         
           column(
+          
             12,
+            p("⚠ Don't forget to choose the right Organismus !!! "),
             checkboxInput("HeatMap1", "Heatmap🔥", value = FALSE),
             
             column(
               width = 2,
+             
               radioButtons(
                 "clustering",
                 "Heatmap Clustering:",
@@ -1033,15 +1032,16 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
                  )),
           column(3,
                  actionButton("click1", "Enrichment Analysis ")),
-          column(
-            7,
-            useShinyjs(),
-            downloadButton("GP", "Export Plots"),
-            downloadButton("GT", "Export Tables"),
+           column(
+             7,
+          # 
+          #   downloadButton("GP", "Export Plots"),
+          #   downloadButton("GT", "Export Tables"),
           ),
           br(),
           fluidRow(sidebarPanel(mainPanel(
-            plotOutput("BioBarPlot", width = "510%", height = "1300"),
+            tags$div( plotOutput("BioBarPlot", width = "280%", height = "1300"),
+                      style = "margin-top: 80px;  margin-left: -480px;"),
             
             tableOutput('Enrichment'),
             
@@ -1081,7 +1081,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
       sidebarLayout(
         # -------------- sidebarPanel
         sidebarPanel(
-          h5("Give ID of KEGG pathways"),
+          h5("Give ID of KEGG pathways. ⚠ Don't forget to choose the right Organismus !!!"),
           textInput("inText", "Pathway iD"),
           column(
             1,
@@ -1101,7 +1101,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             width = 12,
             
             
-            plotOutput("KEGGmap", width = "150%",height = 800) ,#, width = "100%", height = 500
+            plotOutput("KEGGmap", width = "100%",height = 1000) ,#, width = "100%", height = 500
             
             
           )
@@ -1141,6 +1141,19 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
       sidebarPanel(
         width = 4,
         
+          column(
+            12,
+            p(
+              "Select the number of genes to analyze based on the scoring priority of the algorithm used in the analysis.⚠ Don't forget to choose the right Organismus !!! " ,
+            sliderInput(
+              "Genes",
+              "Number of  Genes:",
+              
+              min = 2,
+              max = 3000,
+              value = 100
+            ) ) ),
+         
         checkboxInput(
           "PPInetwork1",
           "Protein–protein interaction (PPI) network analysis ️🕸",

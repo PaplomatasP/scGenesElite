@@ -221,23 +221,22 @@ server <- function(input, output) {
             }
             
             plotInput <- reactive({
-              pdf(NULL)
+            
               mp <- marrangeGrob(BBP, nrow = 6, ncol = 3)
               
              
             })
             
             #Download button for the images and dataset from the enrichment results.
-            output$GP <- downloadHandler(
-              pdf(NULL),
-              filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
-              content = function(file) {
-                filePath <- file.path(tempdir(), "Enrichment_Analysis.png")
-                device <- function(..., width, height) grDevices::png(filePath, width = 18, height = 19, res = 300, units = "in")
-                ggsave(filePath, plot = plotInput(), device = device)
-                file.copy(filePath, file)
-              }
-            )
+            # output$GP <- downloadHandler(
+            #   filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
+            #   content = function(file) {
+            #     filePath <- file.path(tempdir(), "Enrichment_Analysis.png")
+            #     device <- function(..., width, height) grDevices::png(filePath, width = 18, height = 19, res = 300, units = "in")
+            #     ggsave(filePath, plot = plotInput(), device = device)
+            #     file.copy(filePath, file)
+            #   }
+            # )
             
             
         #  })
@@ -266,40 +265,40 @@ server <- function(input, output) {
                 COVID19_Related_Gene_Sets_2021 = enriched[[18]][1:10,][c(1, 2, 3, 9)]
               )
             
-            output$GT <- downloadHandler(
-              filename = function() {
-                paste("Enrichment_Analysis_",
-                      Sys.Date(),
-                      ".zip",
-                      sep = "")
-              },
-              content = function(file) {
-                temp_directory <- file.path(tempdir(), as.integer(Sys.time()))
-                dir.create(temp_directory)
-                
-                reactiveValuesToList(to_download) %>%
-                  imap(function(x, y) {
-                    if (!is.null(x)) {
-                      file_name <- glue("{y}_data.csv")
-                      readr::write_csv(x, file.path(temp_directory, file_name))
-                    }
-                  })
-                
-                
-                zip::zip(
-                  zipfile = file,
-                  files = dir(temp_directory),
-                  root = temp_directory
-                )
-                
-                
-                
-              },
-              contentType = "application/zip"
-              
-            )
-            
-            
+        #     output$GT <- downloadHandler(
+        #       filename = function() {
+        #         paste("Enrichment_Analysis_",
+        #               Sys.Date(),
+        #               ".zip",
+        #               sep = "")
+        #       },
+        #       content = function(file) {
+        #         temp_directory <- file.path(tempdir(), as.integer(Sys.time()))
+        #         dir.create(temp_directory)
+        #         
+        #         reactiveValuesToList(to_download) %>%
+        #           imap(function(x, y) {
+        #             if (!is.null(x)) {
+        #               file_name <- glue("{y}_data.csv")
+        #               readr::write_csv(x, file.path(temp_directory, file_name))
+        #             }
+        #           })
+        #         
+        #         
+        #         zip::zip(
+        #           zipfile = file,
+        #           files = dir(temp_directory),
+        #           root = temp_directory
+        #         )
+        #         
+        #         
+        #         
+        #       },
+        #       contentType = "application/zip"
+        #       
+        #     )
+        #     
+        #     
           }
         }
         
@@ -416,7 +415,6 @@ server <- function(input, output) {
                            
                          })
                          plotInput <- reactive({
-                           pdf(NULL)
 
                            mp <- marrangeGrob(BBP, nrow = 3, ncol = 1)
                         
@@ -425,16 +423,15 @@ server <- function(input, output) {
                          
                          #Download button for the images and dataset from the enrichment results.
                          
-                         output$GP <- downloadHandler(
-                           pdf(NULL),
-                           filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
-                           content = function(file) {
-                             filePath <- file.path(tempdir(), "Enrichment_Analysis.png")
-                             device <- function(..., width, height) grDevices::png(filePath, width = 18, height = 19, res = 300, units = "in")
-                             ggsave(filePath, plot = plotInput(), device = device)
-                             file.copy(filePath, file)
-                           }
-                         )
+                         # output$GP <- downloadHandler(
+                         #   filename = function() { paste("Enrichment_Analysis", '.png', sep='') },
+                         #   content = function(file) {
+                         #     filePath <- file.path(tempdir(), "Enrichment_Analysis.png")
+                         #     device <- function(..., width, height) grDevices::png(filePath, width = 18, height = 19, res = 300, units = "in")
+                         #     ggsave(filePath, plot = plotInput(), device = device)
+                         #     file.copy(filePath, file)
+                         #   }
+                         # )
                          
                          
                          to_download <- reactiveValues(
@@ -455,38 +452,38 @@ server <- function(input, output) {
                          )
                          
                          
-                         output$GT <- downloadHandler(
-                           filename = function() {
-                             paste("Enrichment_Analysis_",
-                                   Sys.Date(),
-                                   ".zip",
-                                   sep = "")
-                           },
-                           content = function(file) {
-                             temp_directory <- file.path(tempdir(), as.integer(Sys.time()))
-                             dir.create(temp_directory)
-                             
-                             reactiveValuesToList(to_download) %>%
-                               imap(function(x, y) {
-                                 if (!is.null(x)) {
-                                   file_name <- glue("{y}_data.csv")
-                                   readr::write_csv(x, file.path(temp_directory, file_name))
-                                 }
-                               })
-                             
-                             
-                             zip::zip(
-                               zipfile = file,
-                               files = dir(temp_directory),
-                               root = temp_directory
-                             )
-                             
-                             
-                             
-                           },
-                           contentType = "application/zip"
-                           
-                         )
+                         # output$GT <- downloadHandler(
+                         #   filename = function() {
+                         #     paste("Enrichment_Analysis_",
+                         #           Sys.Date(),
+                         #           ".zip",
+                         #           sep = "")
+                         #   },
+                         #   content = function(file) {
+                         #     temp_directory <- file.path(tempdir(), as.integer(Sys.time()))
+                         #     dir.create(temp_directory)
+                         #     
+                         #     reactiveValuesToList(to_download) %>%
+                         #       imap(function(x, y) {
+                         #         if (!is.null(x)) {
+                         #           file_name <- glue("{y}_data.csv")
+                         #           readr::write_csv(x, file.path(temp_directory, file_name))
+                         #         }
+                         #       })
+                         #     
+                         #     
+                         #     zip::zip(
+                         #       zipfile = file,
+                         #       files = dir(temp_directory),
+                         #       root = temp_directory
+                         #     )
+                         #     
+                         #     
+                         #     
+                         #   },
+                         #   contentType = "application/zip"
+                         #   
+                         # )
                          
                          
                        }
@@ -540,23 +537,15 @@ server <- function(input, output) {
       
       # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
       ScaledData <- iGlexikon(iG, input$GENEid)
-      # plot_pathview(
-      #   gene.data = ScaledData  ,
-      #   pathway.id = input$inText,
-      #   species = Species ,
-      #   out.suffix = "",
-      #   kegg.native = T,
-      #   save_image = FALSE
-      # )
+    
       plot_pathview(gene.data =ScaledData,
                     pathway.id = input$inText,
-                    species = Species, out.suffix = "",
+                    species = Species, out.suffix = "", save_image = FALSE,
                     keys.align = "y", kegg.native = T, match.data = T, multi.state = T,
                     same.layer = F)
      
       
-      # pathview(gene.data = ScaledData, pathway.id = input$inText,
-      #          species = Species)
+      
 
       
       {
@@ -584,7 +573,7 @@ server <- function(input, output) {
     
     {
       incProgress(7 / 10)
-      # connect the "Run Analysis" button and active  by clicking .
+      # connect the " lysis" button and active  by clicking .
       output$text = eventReactive(input$click, {
         FilterData <- MethodData()
         

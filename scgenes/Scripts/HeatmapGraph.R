@@ -193,16 +193,15 @@ GraphsFun = function(data) {
       
       Labels = data[, ncol(data)]
       data = data[, -ncol(data)]
-      
-      # scale.factor <- mean(colSums(data))
-      #
-      # newdata <- Seurat::LogNormalize(data,
-      #                                 scale.factor = scale.factor)
+      if (input$Genes < nrow(iG)) {
+        GenesN = input$Genes
+        
+      } else{
+        GenesN = nrow(iG)
+      }
+      data=data[colnames(data) %in% rownames(iG)[1:GenesN]]
       newdata = as.matrix(data)
-      #
-      # Scaler=caret::preProcess( newdata, rangeBounds = c(1,2),method = "range")
-      # ScaledLogiG <- predict(Scaler,newdata)
-      # newdata=t(ScaledLogiG)
+      
       
       # Create a graph adjacency based on correlation distances between genes in  pairwise fashion.
       g <- graph.adjacency(
@@ -344,14 +343,24 @@ PPInetwork = function(Genes) {
     {
       incProgress(8 / 10)
       Sys.sleep(0.10)
-      Genes[, 2] = row.names(Genes)
-      colnames(Genes)[2] = "Genes"
+      if (input$Genes < nrow(iG)) {
+        GenesN = input$Genes
+        
+      } else{
+        GenesN = nrow(iG)
+      }
+      
+      dfGenes<- data.frame(cbind(Genes[,1][1:GenesN],row.names(Genes)[1:GenesN]) )
+   
+      colnames(dfGenes)[1] = "Score"
+      colnames(dfGenes)[2] = "Genes"
       
       Mapped <-
-        string_db$map(Genes, "Genes", removeUnmappedRows = TRUE)
+        string_db$map(dfGenes, "Genes", removeUnmappedRows = TRUE)
       hits <- Mapped$STRING_id
       string_db$plot_network(hits)
       
     }
   })
 }
+
