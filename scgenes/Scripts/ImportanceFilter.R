@@ -5,7 +5,7 @@
 ImportanceFilter = function(data,
                             Labels,
                             MLmethod, importanceLimit) {
-  set.seed(1016)
+
   # Make Valid Column Names 
   colnames(data) <- make.names(colnames(data))
   
@@ -18,14 +18,13 @@ ImportanceFilter = function(data,
     "glmnet",
     "lda",
     "bartMachine",
-    "adaboost",
     "treebag",
     "xgbTree"
   )
   # Set ML parameters, based on the ML method chosen
   print(MLmethod)
   if (MLmethod %in% MLlist) {
-    preProcMethod <- c("zv")
+    preProcMethod <- c("zv","scale","center")
     
   } else
   {
@@ -43,7 +42,7 @@ ImportanceFilter = function(data,
   
   trainControl <-
     caret::trainControl(method = "repeatedcv",
-                        number = 10,
+                        number = 5,
                         repeats = 1,
                         p = 0.8,
                         preProcOptions=list(thresh=0.95,na.remove=TRUE,verbose=TRUE)
@@ -52,7 +51,7 @@ ImportanceFilter = function(data,
 
   
   
-  model <-
+  model<-
     caret::train(
       Labels ~ .,
       data = trainData,
@@ -63,14 +62,15 @@ ImportanceFilter = function(data,
       na.action = na.omit
     )
   
-  df_imps = varImp(model)
+  df_imps <- varImp(model)
   
   
   df_imps1 <- df_imps[["importance"]][1]
   df_imps1 <- subset(df_imps1, df_imps1[, 1] > input$importanceLimit)
-  df_imps1 = data.frame(df_imps1[order(df_imps1, decreasing = TRUE), drop = FALSE,])
+ 
+  df_imps1 <-data.frame(df_imps1[order(df_imps1, decreasing = TRUE), drop = FALSE,])
   newdata <- na.omit(df_imps1)
-  
+ 
   
   
   iG <<- newdata
@@ -79,6 +79,6 @@ ImportanceFilter = function(data,
   newdata <- cbind(as.data.frame(newdata), as.data.frame(Labels))
   newdata$Labels = as.factor(newdata$Labels)
   print("Finish")
-  
+ 
   return(newdata)
 }

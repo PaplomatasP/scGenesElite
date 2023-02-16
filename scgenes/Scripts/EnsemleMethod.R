@@ -118,7 +118,7 @@ EnsemleMethod = function(obj, EnseLabels) {
       #
       vote <-
         create_vote(GenesList, xtype = 3, candidate = c(unlist(GenesList)))
-      y <<- borda_method(vote, modified = TRUE)
+      y <- borda_method(vote, modified = TRUE)
       # 
       # RankingResults=as.data.frame(unique(cbind(y[["other_info"]][["count_max"]])) )
       # rownames(RankingResults)=unique(y[["candidate"]])
@@ -151,6 +151,7 @@ EnsemleMethod = function(obj, EnseLabels) {
     
       iG=data.frame(iG[which(rownames(iG) %in% genesNames),] )
       rownames(iG)=Genes
+      iG <<- iG
       newdata <- cbind(as.data.frame(newdata), as.data.frame(as.factor(EnseLabels)) )
       print("here!!!!")
       

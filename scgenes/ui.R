@@ -371,7 +371,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             )
           )),
           # numericInput function
-          numericInput("uniqueCut", "Low Variance cutoff", 10, 0, 100),
+          numericInput("uniqueCut", "Low Variance cutoff", 30, 0, 100),
           numericInput("nfeatures", "High Variable nfeatures", 2000, 0, 10000)
         ),
         
@@ -705,7 +705,6 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               c(
                 "Random Forest Algorithm" = "rf",
                 "eXtreme Gradient Boosting" = "xgbTree",
-                "AdaBoost Classification Trees" = "adaboost",
                 "Bagged CART" = "treebag",
                 "Recursive Partitioning and Regression Trees" = "rpart",
                 "C5.0 Decision Trees and Rule-Based Models" = "C5.0",
