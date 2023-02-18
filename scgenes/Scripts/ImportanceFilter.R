@@ -65,10 +65,10 @@ ImportanceFilter = function(data,
       trControl = trainControl,
       na.action = na.omit
     )
-  print("here")
+
   df_imps <- varImp(model)
   
-  print("here1")
+
    
   df_imps1 <- df_imps[["importance"]][1]
   df_imps1 <- subset(df_imps1, df_imps1[, 1] > input$importanceLimit)
@@ -80,7 +80,7 @@ ImportanceFilter = function(data,
   df_imps1 <- as.data.frame(df_imps1_mat)
   
   newdata <- na.omit(df_imps1)
-  print("here3")
+
   
   
   
