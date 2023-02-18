@@ -8,7 +8,9 @@ MethodData = function() {
     
     if (input$GENEid == "EnsemblGenes") {
       RDS_file <- readRDS(input$rdsFile$datapath)
+
       RDS_file1 <<- LexikonFun(RDS_file, input$organismus, input$GENEid)
+    
       validate(need(
         ncol(RDS_file1) != 0,
         "The Genes Id or the Organismus is not correct"

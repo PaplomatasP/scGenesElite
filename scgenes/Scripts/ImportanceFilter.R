@@ -5,7 +5,6 @@ ImportanceFilter = function(data,
                             MLmethod, importanceLimit) {
   
   
-  
   MLlist = c(
     "rf",
     "knn",
@@ -37,11 +36,16 @@ ImportanceFilter = function(data,
     
   }
   
+  if (input$GENEid=="EnsemblGenes"){
+    colnames(data) <- make.names(colnames(data))
+  }
+  
+  
   
   data$Labels = as.factor(Labels)
   
   partitionData <-
-    caret::createDataPartition(data$Labels, p = 0.8, list = FALSE)
+    caret::createDataPartition(data$Labels, p = 0.75, list = FALSE)
   trainData <- data[partitionData,]
   testData  <- data[-partitionData,]
   
@@ -52,23 +56,24 @@ ImportanceFilter = function(data,
                         p = 0.75
     )
   
-  
-  
-  
-  model<-
+  print("before train")
+
+    model<-
     caret::train(
       Labels ~ .,
       data = trainData,
-      method = MLmethod,  #MLmethod
+      method = "rf",  #MLmethod
       metric = "Accuracy",
       preProc = preProcMethod,
       trControl = trainControl,
       na.action = na.omit
     )
-
+  print("after train")
+  
   df_imps <- varImp(model)
   
-
+  print("after after")
+  
    
   df_imps1 <- df_imps[["importance"]][1]
   df_imps1 <- subset(df_imps1, df_imps1[, 1] > input$importanceLimit)

@@ -836,7 +836,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
           column(
           
             12,
-            p("⚠ Don't forget to choose the right Organismus !!! "),
+            p("⚠ Don't forget to choose the right Organismus and Genes iD !!! "),
             checkboxInput("HeatMap1", "Heatmap🔥", value = FALSE),
             
             column(

@@ -43,7 +43,7 @@ LexikonFun = function(data, organismus, id) {
       Genes <- c(colnames(data[, -ncol(data)]))
       geneIDS <-
         ensembldb::select(
-          EnsDb.Mmusculus.v79::EnsDb.Mmusculus.v79,
+          EnsDb.Hsapiens.v79::EnsDb.Hsapiens.v79,
           keys = Genes,
           keytype = "SYMBOL",
           columns = c("GENENAME", "GENEID", "ENTREZID")
@@ -124,31 +124,7 @@ LexikonFun = function(data, organismus, id) {
 }
 
 iGlexikon = function(iG, id) {
-  # if (id=="ENTREZID"){
-  #
-  #   Scaler <- caret::preProcess(iG , rangeBounds = c(-1,1),method = "range")
-  #   ScaledLogiG <- predict(Scaler,iG)
-  #
-  #
-  # }
-  # if (id=="EnsemblGenes"){
-  #   Genes <- c(colnames(as.data.frame(t(iG))) )
-  #   geneIDS <- ensembldb::select(EnsDb.Mmusculus.v79::EnsDb.Mmusculus.v79, keys= Genes, keytype = "GENEID", columns = c("GENENAME","GENEID","ENTREZID"))
-  #
-  #   geneIDS=geneIDS[-which(is.na(geneIDS[,3][1:nrow(geneIDS)]) ),]
-  #   geneIDS=geneIDS[!duplicated(geneIDS[,1]), ]
-  #   num=which(colnames(as.data.frame(t(iG))) %in% geneIDS[,2])
-  #
-  #   newdata=as.data.frame(t(iG)[,num])
-  #   newdata=as.data.frame(t(newdata))
-  #   colnames(newdata)=geneIDS[,2]
-  #   newdata=as.data.frame(t(newdata))
-  #
-  #   Scaler <- caret::preProcess(newdata , rangeBounds = c(-1,1),method = "range")
-  #   ScaledLogiG <- predict(Scaler,newdata)
-  # }
   
-  #if (id=="SYMBOL"){
   Genes <- c(colnames(as.data.frame(t(iG))))
   geneIDS <-
     ensembldb::select(
