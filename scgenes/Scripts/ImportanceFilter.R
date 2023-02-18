@@ -50,7 +50,7 @@ ImportanceFilter = function(data,
                         number = 3,
                         repeats = 1,
                         p = 0.75
-    )#, preProcOptions=list(thresh=0.95,na.remove=TRUE,verbose=TRUE)
+    )
   
   
   
