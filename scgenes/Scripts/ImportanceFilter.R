@@ -1,13 +1,10 @@
-
-
 #calculate the requested model and find the most importance genes according the running model .
 #Return a expression matrix with the isolated genes .
 ImportanceFilter = function(data,
                             Labels,
                             MLmethod, importanceLimit) {
-
-  # Make Valid Column Names 
- # colnames(data) <- make.names(colnames(data))
+  
+  
   
   MLlist = c(
     "rf",
@@ -24,7 +21,7 @@ ImportanceFilter = function(data,
   # Set ML parameters, based on the ML method chosen
   print(MLmethod)
   if (MLmethod %in% MLlist) {
-    preProcMethod <- c("zv","scale","center")
+    preProcMethod <- c("knnImpute")
     
   } else
   {
@@ -32,7 +29,15 @@ ImportanceFilter = function(data,
     return(-1)
   }
   
- 
+  #| MLmethod=="rpart"
+  if (MLmethod=="rpart" | MLmethod=="treebag" ) {  
+    
+    # Make Valid Column Names 
+    colnames(data) <- make.names(colnames(data))
+    
+  }
+  
+  
   data$Labels = as.factor(Labels)
   
   partitionData <-
@@ -42,13 +47,12 @@ ImportanceFilter = function(data,
   
   trainControl <-
     caret::trainControl(method = "repeatedcv",
-                        number = 5,
+                        number = 3,
                         repeats = 1,
-                        p = 0.8,
-                        preProcOptions=list(thresh=0.95,na.remove=TRUE,verbose=TRUE)
-                        )
+                        p = 0.75
+    )#, preProcOptions=list(thresh=0.95,na.remove=TRUE,verbose=TRUE)
   
-
+  
   
   
   model<-
@@ -61,16 +65,23 @@ ImportanceFilter = function(data,
       trControl = trainControl,
       na.action = na.omit
     )
-  
+  print("here")
   df_imps <- varImp(model)
   
-  
+  print("here1")
+   
   df_imps1 <- df_imps[["importance"]][1]
   df_imps1 <- subset(df_imps1, df_imps1[, 1] > input$importanceLimit)
- 
-  df_imps1 <-data.frame(df_imps1[order(df_imps1, decreasing = TRUE), drop = FALSE,])
+  print("here2")
+  
+  
+  df_imps1_mat <- as.matrix(df_imps1)
+  df_imps1_mat <- df_imps1_mat[order(df_imps1_mat[,1], decreasing = TRUE),, drop = FALSE]
+  df_imps1 <- as.data.frame(df_imps1_mat)
+  
   newdata <- na.omit(df_imps1)
- 
+  print("here3")
+  
   
   
   iG <<- newdata
@@ -79,6 +90,6 @@ ImportanceFilter = function(data,
   newdata <- cbind(as.data.frame(newdata), as.data.frame(Labels))
   newdata$Labels = as.factor(newdata$Labels)
   print("Finish")
- 
+  
   return(newdata)
 }

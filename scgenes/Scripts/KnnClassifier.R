@@ -31,12 +31,7 @@ model <-
 pred = predict(model, newdata=testData)
 
 ConfMatrix<-confusionMatrix(data=pred, testData$Labels, mode = "everything")
-# 
-# Confusion_Matrix<-as.data.frame(round(ConfMatrix[["byClass"]],2) )
-# Confusion_Matrix$Metrics=rownames(Confusion_Matrix)
-# colnames(Confusion_Matrix)[1]=""
-# colnames(Confusion_Matrix)[2]=" k-NN Classifier"
-# Confusion_Matrix=Confusion_Matrix[-c(1,2),]
+
 Confusion_Matrix=ConfMatrixPlot(ConfMatrix)
 return(Confusion_Matrix)
 

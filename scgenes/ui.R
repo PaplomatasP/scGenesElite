@@ -371,7 +371,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             )
           )),
           # numericInput function
-          numericInput("uniqueCut", "Low Variance cutoff", 30, 0, 100),
+          numericInput("uniqueCut", "Low Variance cutoff", 15, 0, 100),
           numericInput("nfeatures", "High Variable nfeatures", 2000, 0, 10000)
         ),
         
@@ -451,7 +451,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               "Normalization:",
               c("Normalization" = "Normal",
                 "No-Normalization" = "No_Normal"),
-              selected = "No_Normal",
+              selected = "Normal",
               inline = TRUE
               
             ),
