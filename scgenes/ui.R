@@ -773,7 +773,6 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               choices = list(
                 "Random Forest Algorithm" = "rf",
                 "eXtreme Gradient Boosting" = "xgbTree",
-                "AdaBoost Classification Trees" = "adaboost",
                 "Bagged CART" = "treebag",
                 "Recursive Partitioning and Regression Trees" = "rpart",
                 "C5.0 Decision Trees and Rule-Based Models" = "C5.0",

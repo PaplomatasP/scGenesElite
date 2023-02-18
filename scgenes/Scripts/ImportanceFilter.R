@@ -7,7 +7,7 @@ ImportanceFilter = function(data,
                             MLmethod, importanceLimit) {
 
   # Make Valid Column Names 
-  colnames(data) <- make.names(colnames(data))
+ # colnames(data) <- make.names(colnames(data))
   
   MLlist = c(
     "rf",
