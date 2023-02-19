@@ -30,7 +30,7 @@ server <- function(input, output) {
                    detail = '        This may take a while...',
                    value = 0,
                    {         
-                     url = "https://raw.githubusercontent.com/PaplomatasP/scGenesElite/blob/Master/scgenes/data/ExampleData.rds"
+                     url = "https://raw.githubusercontent.com/PaplomatasP/scGenesElite/blob/Master/scgenes/data/ExampleData.csv"
                      {
                        incProgress(4 / 10)
                        Sys.sleep(0.25)
