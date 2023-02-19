@@ -1038,7 +1038,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
           ),
           br(),
           fluidRow(sidebarPanel(mainPanel(
-            tags$div( plotOutput("BioBarPlot", width = "280%", height = "1300"),
+            tags$div( plotOutput("BioBarPlot", width = "215%", height = "1300"),
                       style = "margin-top: 80px;  margin-left: -480px;"),
             
             tableOutput('Enrichment'),
@@ -1149,7 +1149,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               
               min = 2,
               max = 3000,
-              value = 100
+              value = 50
             ) ) ),
          
         checkboxInput(
@@ -1191,8 +1191,8 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
         
         column(
           width = 3,
-          plotOutput("PPInetwork", width = "400%", height = "800"),
-          visNetworkOutput("graph", width = "400%", height = "800")
+          plotOutput("PPInetwork", width = "450%", height = "850"),
+          visNetworkOutput("graph", width = "450%", height = "850")
           
         )
       )

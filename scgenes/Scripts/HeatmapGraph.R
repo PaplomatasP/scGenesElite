@@ -142,11 +142,7 @@ complexHeatMapFun = function(data,Plot=TRUE) {
         
       } else{
         print("None Clusterin")
-       # library(scales)
-        
-        # data$CK <- rescale(data$CK, to = c(1, 2))
-        # data$CKp25<- rescale(data$CKp25, to = c(1, 2))
-        
+       
         HeatMAP = Heatmap(
           as.matrix(data[1:GenesN, ]),
           top_annotation = column_ha,
@@ -199,9 +195,12 @@ GraphsFun = function(data) {
       } else{
         GenesN = nrow(iG)
       }
-      data=data[colnames(data) %in% rownames(iG)[1:GenesN]]
-      newdata = as.matrix(data)
       
+      print("before")
+      data<-data[colnames(data) %in% rownames(iG)[1:GenesN]]
+     
+      newdata = as.matrix(data)
+      print("afternoon")
       
       # Create a graph adjacency based on correlation distances between genes in  pairwise fashion.
       g <- graph.adjacency(
@@ -213,7 +212,7 @@ GraphsFun = function(data) {
         diag = FALSE
       )
     }
-    
+    print("afternoon1")
     {
       incProgress(6 / 10)
       Sys.sleep(0.10)
@@ -277,7 +276,7 @@ GraphsFun = function(data) {
         make_clusters(mst, membership = mst.communities$membership)
       V(mst)$color <- mst.communities$membership + 1
       
-      
+      if (length(E(g)) != 0) {
       visIgraph(mst,
                 idToLabel = TRUE,
                 layout = "layout_nicely",
@@ -313,7 +312,13 @@ GraphsFun = function(data) {
           manipulation = NULL
         )  %>%
         visLayout(randomSeed = 11)
-    }
+      }else{ showModal(modalDialog(
+        title = "Message",
+        "It appears that there are no edge attributes, please try lowering the threshold for the absolute Pearson correlation.",
+        easyClose = TRUE,footer = modalButton("OK")
+      ))
+      }
+      }
   })
   
 }

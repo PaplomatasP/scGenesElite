@@ -583,9 +583,10 @@ server <- function(input, output) {
           text3()
           
           if (input$graph1) {
-            print("i am here")
+          
             
             isolate({
+           
               GraphsFun(FilterData)
             })
             
