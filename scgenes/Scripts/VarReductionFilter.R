@@ -6,12 +6,13 @@ VarReductionFilter = function(data, Labels) {
   
   
   if (input$VarFilter == "Lightweight_Filter") {
-    
+   
     colnames(data) <- make.names(colnames(data))
 
     Ndata = as.data.frame(t(data[, -ncol(data)]))
-    dim(Ndata)
-    Seraut_obj <- CreateSeuratObject(Ndata)
+   
+    Seraut_obj <<- CreateSeuratObject(Ndata)
+    
     DataSeurat <-
       FindVariableFeatures(Seraut_obj,
                            selection.method = "vst",

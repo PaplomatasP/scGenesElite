@@ -575,8 +575,8 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
                 numericInput(
                   "M3dropthreshold",
                   "mt_threshold",
-                  value = 0.05,
-                  min = 0.001,
+                  value = 0.001,
+                  min = 0,
                   max = 1,
                   step = 0.01
                 )
@@ -594,7 +594,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
                      numericInput(
                        "n",
                        "# Features",
-                       value = 150,
+                       value = 300,
                        min = 1,
                        step = 1
                      )),
