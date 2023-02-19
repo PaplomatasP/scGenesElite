@@ -29,8 +29,8 @@ server <- function(input, output) {
       withProgress(message = 'Data are downloading',
                    detail = '        This may take a while...',
                    value = 0,
-                   {
-                     url = "https://raw.githubusercontent.com/PaplomatasP/DegenerativApp/Master/ExampleData.csv"
+                   {         
+                     url = "https://raw.githubusercontent.com/PaplomatasP/scGenesElite/blob/Master/scgenes/data/ExampleData.rds"
                      {
                        incProgress(4 / 10)
                        Sys.sleep(0.25)
