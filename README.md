@@ -91,6 +91,6 @@ With PPI analysis, users can choose a threshold to include only interactions wit
 
 Similarity graph analysis helps users find molecular modules by comparing gene interaction profiles.
 
-[![screen shot of similarity graph](images/similarity_graph.png)](images/ppi.png)
+[![screen shot of similarity graph](images/similarity_graph.png)](images/similaritygraph.png)
 
 Users can adjust the level of similarity by setting a Pearson correlation threshold.
