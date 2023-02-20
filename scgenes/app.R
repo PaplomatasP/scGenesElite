@@ -75,9 +75,12 @@ server <- function(input, output) {
       input$file1$datapath,
       header = input$header,
       sep = input$sep,
-      quote = input$quote
+      quote = input$quote,
+      row.names = 1
+    
     )
-    CSV_file <- as.data.frame(df)
+    CSV_file <<- as.data.frame(df)
+    
     if (input$disp == "head") {
       return(CSV_file[1:10, (ncol(CSV_file) - 10):ncol(CSV_file)])
     }

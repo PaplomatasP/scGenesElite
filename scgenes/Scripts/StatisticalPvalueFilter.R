@@ -179,13 +179,14 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
     count = 0
     PvalueTreshold = list()
     for (i in seq(1, nrow(PvalueData))) {
-      if (PvalueData[, 2][i] <= threshold) {
+      if (!is.na(PvalueData[, 3][i]) && PvalueData[, 3][i] <= threshold)  {
         count = count + 1
         
         PvalueTreshold[[count]] = rownames(PvalueData)[i]
       }
     }
     PvalueTreshold = as.data.frame(cbind(PvalueTreshold))
+    if (length(PvalueTreshold) != 0){
     row.names(PvalueTreshold) = PvalueTreshold[, 1]
     
     PvalueData1 <-
@@ -202,25 +203,35 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
     neudata = as.data.frame(neudata)
     
     neudata$Labels = as.factor(Labels)
+    return(neudata)
+    }else{ showModal(modalDialog(
+      title = "Message",
+      "Please consider increasing the P-value threshold!!!",
+      easyClose = TRUE,footer = modalButton("OK")
+    ))
+    }
   }
   if (input$P_method == "DESeq2_method") {
     print("DESeq2_method")
     count = 0
     PvalueTreshold = list()
-    for (i in seq(1, nrow(PvalueData))) {
-      if (PvalueData[, 3][i] <= threshold) { #threshold
+    print("here")
+    for (i in 1:nrow(PvalueData)) {
+      if (!is.na(PvalueData[, 3][i]) && PvalueData[, 3][i] <= threshold) {  #threshold
+        print(i)
         count = count + 1
-        
+
         PvalueTreshold[[count]] = rownames(PvalueData)[i]
       }
     }
     PvalueTreshold <- as.data.frame(cbind(PvalueTreshold))
-    
+    print("here2")
+    if (length(PvalueTreshold) != 0){
+     
     PvalueData=as.data.frame(PvalueData)
     
     
     PvalueData1 = data.frame(PvalueData[order(PvalueData$pval, decreasing = FALSE), drop = FALSE,])
-    
     
     iG1 = subset(PvalueData1 , rownames(PvalueData1) %in% PvalueTreshold[, 1])
     iG = cbind((iG1[, -c(1, 2, 4)]))
@@ -230,11 +241,18 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
 
     neudata <- obj[, colnames(obj) %in% row.names(iG)]
     neudata<-as.data.frame(neudata)
-   
+
     
     neudata$Labels = as.factor(Labels)
     
+    return(neudata)
+    }else{ showModal(modalDialog(
+      title = "Message",
+      "Please consider increasing the P-value threshold!!!",
+      easyClose = TRUE,footer = modalButton("OK")
+    ))
+    }
     
   }
-  return(neudata)
+
 }
