@@ -7,7 +7,7 @@ EnsemleMethod = function(obj, EnseLabels) {
   ####Variable METHODS
   
   if (input$ensembleVar == "SCMarker") {
-    DATA <<- SCMarkerfun(
+    DATA <- SCMarkerfun(
       obj,
       Labels = EnseLabels,
       GeneSK = input$geneK,
@@ -22,18 +22,18 @@ EnsemleMethod = function(obj, EnseLabels) {
     GenesList = append(GenesList, list(DATA1 = colnames(DATA1)))
   }
   if (input$ensembleVar == "DUBStepR") {
-    DATA2 <<- DUBStepRfun(obj,Labels = EnseLabels)
+    DATA2 <- DUBStepRfun(obj,Labels = EnseLabels)
     
     GenesList = append(GenesList, list(DATA2 = colnames(DATA2)))
   }
   if (input$ensembleVar == "ScPNMF") {
-    DATA3 <<- scPNMFfun(obj,
+    DATA3 <- scPNMFfun(obj,
                        Labels = EnseLabels,
                        DM <- input$distMethod)
     GenesList = append(GenesList, list(DATA3 = colnames(DATA3)))
   }
   if (input$ensembleVar == "M3Dropfun") {
-    DATA8 <<- M3Dropfun(obj,
+    DATA8 <- M3Dropfun(obj,
                        Labels = EnseLabels)
     GenesList = append(GenesList, list(DATA8 = colnames(DATA8)))
   }
@@ -41,7 +41,7 @@ EnsemleMethod = function(obj, EnseLabels) {
   ####PVALUE METHODS
   
   if (input$ensemblePvalue == "Seurat_method") {
-    DATA4 <<- SelectionFilter(
+    DATA4 <- SelectionFilter(
       obj,
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum
@@ -49,7 +49,7 @@ EnsemleMethod = function(obj, EnseLabels) {
     GenesList = append(GenesList, list(DATA4 = colnames(DATA4)[-ncol(DATA4)]))
   }
   if (input$ensemblePvalue == "BPSC_metchod") {
-    DATA5 <<- SelectionFilter(
+    DATA5 <- SelectionFilter(
       obj,
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum
@@ -57,7 +57,7 @@ EnsemleMethod = function(obj, EnseLabels) {
     GenesList = append(GenesList, list(DATA5 = colnames(DATA5)[-ncol(DATA5)]))
   }
   if (input$ensemblePvalue == "MAST_method") {
-    DATA6 <<- SelectionFilter(
+    DATA6 <- SelectionFilter(
        obj,
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum

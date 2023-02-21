@@ -337,8 +337,8 @@ MethodData = function() {
           input$VariableM == "NoMethod" & input$Wrapper_ML_Method == "Empty" &
           input$ML_Method == "Empty") {
         print("EnsemleMethod")
-        FilterData <- EnsemleMethod(data = CSV_file1[,-ncol(CSV_file1)],
-                                    Labels = CSV_file1[, ncol(CSV_file1)])
+        FilterData <- EnsemleMethod(obj = CSV_file1[,-ncol(CSV_file1)],
+                                    EnseLabels = CSV_file1[, ncol(CSV_file1)])
       }
       
       
