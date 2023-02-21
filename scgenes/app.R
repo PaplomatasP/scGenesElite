@@ -79,7 +79,7 @@ server <- function(input, output) {
       row.names = 1
     
     )
-    CSV_file <<- as.data.frame(df)
+    CSV_file <- as.data.frame(df)
     
     if (input$disp == "head") {
       return(CSV_file[1:10, (ncol(CSV_file) - 10):ncol(CSV_file)])

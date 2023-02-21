@@ -295,6 +295,7 @@ MethodData = function() {
     if (input$GENEid == "EnsemblGenes") {
       CSV_file <- read.csv(input$file1$datapath)
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
+      rownames(CSV_file1)=rownames(CSV_file)
       validate(need(
         ncol(CSV_file1) != 0,
         "The Genes Id or the Organismus is not correct"
@@ -304,6 +305,7 @@ MethodData = function() {
     if (input$GENEid == "ENTREZID") {
       CSV_file <- read.csv(input$file1$datapath)
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
+      rownames(CSV_file1)=rownames(CSV_file)
       validate(need(
         ncol(CSV_file1) != 0,
         "The Genes Id or the Organismus is not correct"
@@ -313,6 +315,7 @@ MethodData = function() {
     if (input$GENEid == "SYMBOL") {
       CSV_file <- read.csv(input$file1$datapath)
       CSV_file1 <<- LexikonFun(CSV_file, input$organismus, input$GENEid)
+      rownames(CSV_file1)=rownames(CSV_file)
       validate(need(
         ncol(CSV_file1) != 0,
         "The Genes Id or the Organismus is not correct"

@@ -3,6 +3,7 @@
 ###SCMarker####
 # Use the SCMarker feature selection method  and return a dataframe the expression matrix of the isolated genes.
 SCMarkerfun = function(data, GeneSK, CellSK, Labels) {
+  
   obj = as.matrix(data[, -ncol(data)])
   if (input$VarFilter != "Unselect") {
     print("Variance Filter Activated")
@@ -319,7 +320,7 @@ scPNMFfun = function(data, Labels, DM) {
     }
     
   }
-  print("eimai ektos!!")
+
   W <- res_pnmf$Weight
   S <- res_pnmf$Score
   
