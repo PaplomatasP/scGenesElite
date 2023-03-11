@@ -114,7 +114,7 @@ ui <- #fluidPage(div(class = "tab-content",
     tabPanel (
      
       
-        title = tags$img(src='scGenesElite.jpg.png', width = '200px', height = '80px'),
+        title = tags$img(src='scGenesElite.jpg.png', width = '180px', height = '75px'),
     
       
       sidebarLayout(
@@ -131,7 +131,7 @@ ui <- #fluidPage(div(class = "tab-content",
           br(),
           strong(
             h1(
-              "A tool-guide for the identification of more robust genes-level drug targets and biomarkers for complex diseases."
+              "A web platform that facilitates the identification of leading genes from scRNA-seq data."
             )
           ),
       

@@ -58,7 +58,7 @@ server <- function(input, output) {
     if (is.null(RDS_file)) {
       return()
     } else {
-        rd <- readRDS(RDS_file$datapath)
+      rd <- readRDS(RDS_file$datapath)
       return(rd[1:10, (ncol(rd) - 10):ncol(rd)])
     }
     
@@ -75,12 +75,9 @@ server <- function(input, output) {
       input$file1$datapath,
       header = input$header,
       sep = input$sep,
-      quote = input$quote,
-      row.names = 1
-    
+      quote = input$quote
     )
     CSV_file <- as.data.frame(df)
-    
     if (input$disp == "head") {
       return(CSV_file[1:10, (ncol(CSV_file) - 10):ncol(CSV_file)])
     }

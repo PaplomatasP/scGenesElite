@@ -36,18 +36,22 @@ SCMarkerfun = function(data, GeneSK, CellSK, Labels) {
       data = obj,
       geneK = GeneSK,
       cellK = CellSK,
-      cutoff = 3,
-      width = 5
+      cutoff = 2,
+      width = 1
     )# default width = 1 for UMI data, width =2 for TPM data.
-  res = GeneFilter(obj = res)
-  genes = res[["geneSumm"]][["gene"]]
-  Score = res[["geneSumm"]][["count"]]
-  iG <- cbind(Score)
-  rownames(iG) = genes
+  res = SCMarker::GeneFilter(obj = res)
+  res= SCMarker::getMarker(obj=res,k=150,n=20)
+  genes = res[["marker"]]
+  # Score = res[["geneSumm"]][["count"]]
+  Score=cbind(res[["geneSumm"]][["gene"]],res[["geneSumm"]][["count"]])
+  Score=Score[which(Score[,1] %in% genes),]
+  
+  iG <- cbind(as.numeric(Score[,2] ) )
+  rownames(iG) = Score[,1]
   iG = iG[order(iG[, 1], decreasing = TRUE), ]
   
   
-      iG <<- as.data.frame(iG)
+  iG <<- as.data.frame(iG)
   
   
   newdata <- data[, colnames(data) %in%  genes]

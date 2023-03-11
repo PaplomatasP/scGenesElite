@@ -145,7 +145,7 @@ PvalueCalc = function(data, Pvaluemethod) {
     result_DESeq2 <- list(gene_names = rownames(res_cpm),
                           pvalue = res_cpm$pvalue,
                           FDR = res_cpm$padj)
-    print("hi111")
+  
     return(result_DESeq2)
   }
   
