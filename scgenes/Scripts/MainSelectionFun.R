@@ -163,29 +163,25 @@ MethodData = function() {
                      
                      par(mar = c(7, 4.2, 4.1, 3))
                      barplot(
-                       height = dfbar[, 1]
-                       ,
-                       names.arg = rownames(dfbar)
-                       ,
-                       las = 2
-                       ,
-                       col = dfbar$Color
-                       ,
-                       border = NA  # eliminates borders around the bars
-                       ,
-                       main = "Most Important Genes which Act as Potential Biomarkers for the given case-study"
-                       ,
+                       height = dfbar[, 1],
+                       names.arg = rownames(dfbar),
+                       las = 2,
+                       col = dfbar$Color,
+                       border = NA,
+                       main = "Most Important Genes which Act as Potential Biomarkers for the given case-study",
                        cex.main = 1.2,
-                       #  ylab = "Variable Importance Values",
-                       
-                       xlab = "Genes ID " ,
+                       #xlab = "Genes ID",
                        cex.names = 0.5
                      )
-                     title(
-                       ylab = "Variable Importance Values",
-                       line = 3.5,
-                       cex.lab = 1,
-                       family = "Calibri Light"
+                     mtext(
+                       "Genes ID",
+                       side = 1,
+                       line = 3,
+                       cex = 1.2,
+                       font = 2,
+                       col = "black",
+                       family = "Calibri Light",
+                       padj = 1.5
                      )
                      
                      
@@ -453,29 +449,25 @@ MethodData = function() {
             
             par(mar = c(7, 4.2, 4.1, 3))
             barplot(
-              height = dfbar[, 1]
-              ,
-              names.arg = rownames(dfbar)
-              ,
-              las = 2
-              ,
-              col = dfbar$Color
-              ,
-              border = NA  # eliminates borders around the bars
-              ,
-              main = "Most Important Genes which Act as Potential Biomarkers for the given case-study"
-              ,
+              height = dfbar[, 1],
+              names.arg = rownames(dfbar),
+              las = 2,
+              col = dfbar$Color,
+              border = NA,
+              main = "Most Important Genes which Act as Potential Biomarkers for the given case-study",
               cex.main = 1.2,
-              #  ylab = "Variable Importance Values",
-              
-              xlab = "Genes ID " ,
+              #xlab = "Genes ID",
               cex.names = 0.5
             )
-            title(
-              ylab = "Variable Importance Values",
-              line = 3.5,
-              cex.lab = 1,
-              family = "Calibri Light"
+            mtext(
+              "Genes ID",
+              side = 1,
+              line = 3,
+              cex = 1.2,
+              font = 2,
+              col = "black",
+              family = "Calibri Light",
+              padj = 1.5
             )
             
             

@@ -636,8 +636,8 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             numericInput(
               "PvalueNum",
               "P-Value Threshold",
-              value = 0.05,
-              min = 0.01,
+              value = 0.01,
+              min = 0.001,
               max = 0.99,
               step = 0.01
             ),
