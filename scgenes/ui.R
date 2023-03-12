@@ -648,7 +648,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
         ),
         # ---------------Wrapper Based ML tab
         tabPanel(
-          "Wrapper Based ML",
+          "Non Tree-based ML",
           
           
           # ---------------sidebarPanel
@@ -662,7 +662,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             selectInput(
               "Wrapper_ML_Method",
-              "Wrapper Machine Learning Methods:",
+              "Non Tree Based Machine Learning Methods:",
               c(
                 "Linear Discriminant Analysis" = "lda",
                 "Lasso and Elastic-Net Regularized Generalized Linear Models" = "glmnet",
@@ -769,7 +769,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             radioButtons(
               'ensembleWrapper',
-              label    = "Wrapper Based Methods:",
+              label    = "Tree Based Methods:",
               choices = list(
                 "Random Forest Algorithm" = "rf",
                 "eXtreme Gradient Boosting" = "xgbTree",
@@ -783,7 +783,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             ),
             radioButtons(
               'ensembleMLBased',
-              label    = "ML Based Methods:",
+              label    = "Non Tree Based Methods:",
               choices = list(
                 "Linear Discriminant Analysis" = "lda",
                 "Lasso and Elastic-Net Regularized Generalized Linear Models" = "glmnet",
