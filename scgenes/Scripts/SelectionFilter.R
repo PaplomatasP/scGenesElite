@@ -3,18 +3,18 @@
 
 SelectionFilter = function(data,
                            Labels,
-                           PvalueNum 
+                           PvalueNum ,logfc
                            ) {
   if (input$VarFilter!="Unselect" ){print("Variance Filter Activated")
     MSET_VarFilter <- VarReductionFilter(data, Labels)
     #MSET_VarFilter = MSET_VarFilter[,-(ncol(MSET_VarFilter))]
     
-    MSET_PvalueFilter <- StatisticalPvalueFilter(MSET_VarFilter,Labels, threshold = PvalueNum)
+    MSET_PvalueFilter <- StatisticalPvalueFilter(MSET_VarFilter,Labels, threshold = PvalueNum,logfc = logfc)
     #MSET_PvalueFilter = MSET_PvalueFilter[,-(ncol(MSET_PvalueFilter))]
    
   }
   else{
-    MSET_PvalueFilter <- StatisticalPvalueFilter(data,Labels, threshold = PvalueNum)
+    MSET_PvalueFilter <- StatisticalPvalueFilter(data,Labels, threshold = PvalueNum,logfc= logfc)
     
   }
   

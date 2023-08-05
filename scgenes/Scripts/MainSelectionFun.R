@@ -44,7 +44,7 @@ MethodData = function() {
                      Sys.sleep(0.10)
                    }
                    if (input$P_method == "Empty" &
-                       input$VariableM == "NoMethod" & input$Wrapper_ML_Method == "Empty" &
+                       input$VariableM == "NoMethod"  &
                        input$ML_Method == "Empty") {
                      print("EnsemleMethod")
                      FilterData <- EnsemleMethod(obj = RDS_file1[,-ncol(RDS_file1)],
@@ -53,9 +53,10 @@ MethodData = function() {
                    
                    
                    else if (input$P_method == "Empty" &
-                            input$VariableM == "NoMethod" &
-                            input$Wrapper_ML_Method == "Empty" & input$VariableM == "NoMethod" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod") {
+                          input$VariableM == "NoMethod"   &
+                          input$ensembleVar=="NoMethod" & 
+                           input$ensemblePvalue=="NoMethod"
+                         ) {
                      print("ML_Method")
                      FilterData <- SelectionFilter1(
                        data = RDS_file1[,-ncol(RDS_file1)],
@@ -64,22 +65,10 @@ MethodData = function() {
                        
                      )
                    }
-                   else if (input$P_method == "Empty" &
-                            input$VariableM == "NoMethod" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" &  input$ML_Method=="Empty") {
-                     
-                     print("Wrapper_ML_Method")
-                     FilterData <- SelectionFilter1(
-                       data = RDS_file1[,-ncol(RDS_file1)],
-                       Labels = RDS_file1[, ncol(RDS_file1)],
-                       MLmethod = input$Wrapper_ML_Method
-                       
-                     )
-                   }
                    
                    else if (input$VariableM == "SCMarker" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-                            input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+                            & input$ensembleWrapper=="NoMethod" & 
+                            input$ML_Method=="Empty") {
                      FilterData <- SCMarkerfun(
                        RDS_file1,
                        Labels = RDS_file1[, ncol(RDS_file1)],
@@ -90,8 +79,8 @@ MethodData = function() {
                    }
                    
                    else if (input$VariableM == "SelfE" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-                            input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+                            & input$ensembleWrapper=="NoMethod" & 
+                             input$ML_Method=="Empty") {
                      FilterData <- SelfEGenes(RDS_file1,
                                               Labels = RDS_file1[, ncol(RDS_file1)],
                                               input$n)
@@ -99,8 +88,8 @@ MethodData = function() {
                      
                    }
                    else if (input$VariableM == "DUBStepR" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-                            input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+                            & input$ensembleWrapper=="NoMethod" & 
+                          input$ML_Method=="Empty") {
                      
                      FilterData <- DUBStepRfun(RDS_file1,
                                                Labels = RDS_file1[, ncol(RDS_file1)])
@@ -109,8 +98,8 @@ MethodData = function() {
                    }
                    
                    else if (input$VariableM == "ScPNMF" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-                            input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+                            & input$ensembleWrapper=="NoMethod" & 
+                            input$ML_Method=="Empty") {
                      FilterData <- scPNMFfun(RDS_file1,
                                              Labels = RDS_file1[, ncol(RDS_file1)],
                                              DM <- input$distMethod)
@@ -118,19 +107,19 @@ MethodData = function() {
                      
                    }
                    else if (input$VariableM == "M3Drop"  &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                            &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-                            input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+                            & input$ensembleWrapper=="NoMethod" & 
+                             input$ML_Method=="Empty") {
                      
                      FilterData <- M3Dropfun(RDS_file1,
                                              Labels = RDS_file1[, ncol(RDS_file1)])
                    }
                    else if  (input$VariableM == "NoMethod"  & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                        &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & input$P_method!="Empty"& 
-                        input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty"){
+                        & input$ensembleWrapper=="NoMethod" & input$P_method!="Empty"& 
+                         input$ML_Method=="Empty"){
                      FilterData <- SelectionFilter( 
                        data = RDS_file1[,-ncol(RDS_file1)],
                        Labels = RDS_file1[, ncol(RDS_file1)],
-                       PvalueNum = input$PvalueNum
+                       PvalueNum = input$PvalueNum , logfc= input$logfc
                      )
                    }else {
                     shinyalert(title = "Message",type = "error",
@@ -147,7 +136,7 @@ MethodData = function() {
                      
                          
                     
-                     dfbar = head(iG, input$genes)
+                     dfbar = as.data.frame(head(iG, input$genes) ) #input$genes
                      ColorFun <-
                        colorRampPalette(c("#CCCCCC" , "#104E8B"))
                      ColorPaleta <- ColorFun(n = nrow(x = dfbar))
@@ -160,6 +149,7 @@ MethodData = function() {
                          ,
                          labels = ColorPaleta  # label the groups with the color in ColorPaleta
                        ))
+                   
                      
                      par(mar = c(7, 4.2, 4.1, 3))
                      barplot(
@@ -330,7 +320,7 @@ MethodData = function() {
       
       req(input$click) #to prevent print at first lauch
       if (input$P_method == "Empty" &
-          input$VariableM == "NoMethod" & input$Wrapper_ML_Method == "Empty" &
+          input$VariableM == "NoMethod"  &
           input$ML_Method == "Empty") {
         print("EnsemleMethod")
         FilterData <- EnsemleMethod(obj = CSV_file1[,-ncol(CSV_file1)],
@@ -340,8 +330,8 @@ MethodData = function() {
       
       else if (input$P_method == "Empty" &
                input$VariableM == "NoMethod" &
-               input$Wrapper_ML_Method == "Empty" & input$VariableM == "NoMethod" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod") {
+               input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
+               &  input$ensembleMLBased=="NoMethod") {
         print("ML_Method")
         FilterData <- SelectionFilter1(
           data = CSV_file1[,-ncol(CSV_file1)],
@@ -350,22 +340,10 @@ MethodData = function() {
           
         )
       }
-      else if (input$P_method == "Empty" &
-               input$VariableM == "NoMethod" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" &  input$ML_Method=="Empty") {
-        
-        print("Wrapper_ML_Method")
-        FilterData <- SelectionFilter1(
-          data = CSV_file1[,-ncol(CSV_file1)],
-          Labels = CSV_file1[, ncol(CSV_file1)],
-          MLmethod = input$Wrapper_ML_Method
-          
-        )
-      }
       
       else if (input$VariableM == "SCMarker" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-               input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+               & input$ensembleWrapper=="NoMethod" & 
+               input$ML_Method=="Empty") {
         FilterData <- SCMarkerfun(
           CSV_file1,
           Labels = CSV_file1[, ncol(CSV_file1)],
@@ -376,8 +354,8 @@ MethodData = function() {
       }
       
       else if (input$VariableM == "SelfE" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-               input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+               & input$ensembleWrapper=="NoMethod" & 
+                input$ML_Method=="Empty") {
         FilterData <- SelfEGenes(CSV_file1,
                                  Labels = CSV_file1[, ncol(CSV_file1)],
                                  input$n)
@@ -385,8 +363,8 @@ MethodData = function() {
         
       }
       else if (input$VariableM == "DUBStepR" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-               input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+               & input$ensembleWrapper=="NoMethod" & 
+                input$ML_Method=="Empty") {
         
         FilterData <- DUBStepRfun(CSV_file1,
                                   Labels = CSV_file1[, ncol(CSV_file1)])
@@ -395,8 +373,8 @@ MethodData = function() {
       }
       
       else if (input$VariableM == "ScPNMF" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-               input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+               & input$ensembleWrapper=="NoMethod" & 
+                input$ML_Method=="Empty") {
         FilterData <- scPNMFfun(CSV_file1,
                                 Labels = CSV_file1[, ncol(CSV_file1)],
                                 DM <- input$distMethod)
@@ -404,19 +382,19 @@ MethodData = function() {
         
       }
       else if (input$VariableM == "M3Drop"  &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & 
-               input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty") {
+               & input$ensembleWrapper=="NoMethod" & 
+                input$ML_Method=="Empty") {
         
         FilterData <- M3Dropfun(CSV_file1,
                                 Labels = CSV_file1[, ncol(CSV_file1)])
       }
       else if  (input$VariableM == "NoMethod"  & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-                &   input$ensembleWrapper=="NoMethod" &  input$ensembleMLBased=="NoMethod" & input$P_method!="Empty"& 
-                input$Wrapper_ML_Method == "Empty" & input$ML_Method=="Empty"){
+                & input$ensembleWrapper=="NoMethod" & input$P_method!="Empty"& 
+                 input$ML_Method=="Empty"){
         FilterData <- SelectionFilter( 
           data = CSV_file1[,-ncol(CSV_file1)],
           Labels = CSV_file1[, ncol(CSV_file1)],
-          PvalueNum = input$PvalueNum
+          PvalueNum = input$PvalueNum, logfc= input$logfc
         )
       }else {
         shinyalert(title = "Message",type = "error",
@@ -433,7 +411,7 @@ MethodData = function() {
             
             
             
-            dfbar = head(iG, input$genes)
+            dfbar = as.data.frame(head(iG, input$genes) )
             ColorFun <-
               colorRampPalette(c("#CCCCCC" , "#104E8B"))
             ColorPaleta <- ColorFun(n = nrow(x = dfbar))
@@ -587,4 +565,3 @@ MethodData = function() {
   return(FilterData)
   
 }
-# of Genes which operate as Biomarkers

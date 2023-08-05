@@ -44,25 +44,20 @@ ImportanceFilter = function(data,
   
   data$Labels = as.factor(Labels)
   
-  partitionData <-
-    caret::createDataPartition(data$Labels, p = 0.75, list = FALSE)
-  trainData <- data[partitionData,]
-  testData  <- data[-partitionData,]
   
   trainControl <-
     caret::trainControl(method = "repeatedcv",
                         number = 3,
-                        repeats = 1,
-                        p = 0.75
+                        repeats = 1
     )
   
   print("before train")
-
-    model<-
+  
+  model<-
     caret::train(
       Labels ~ .,
-      data = trainData,
-      method = "rf",  #MLmethod
+      data = data,
+      method = MLmethod,  #MLmethod
       metric = "Accuracy",
       preProc = preProcMethod,
       trControl = trainControl,

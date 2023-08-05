@@ -40,9 +40,6 @@ PvalueCalc = function(data, Pvaluemethod) {
     Input <-
       Seurat::CreateSeuratObject(counts = object_Seurat, meta.data = MetaData)
     
-    Input <- Seurat::NormalizeData(object  = Input)
-    
-  #  scater::Input <- RenameCells(Input)
     
     result <-
       Seurat::FindMarkers(
@@ -59,7 +56,8 @@ PvalueCalc = function(data, Pvaluemethod) {
     results_Seurat <- list(
       gene_names = row.names(result),
       pvalue = result$p_val,
-      FDR = result$p_val_adj
+      FDR = result$p_val_adj,
+      logFC = result$avg_log2FC
     )
     
     return(results_Seurat)
@@ -74,6 +72,16 @@ PvalueCalc = function(data, Pvaluemethod) {
       as.matrix(SummarizedExperiment::assay(data, "normcounts"))
     
     controllds <- which(data$label == levels(factor(data$label)[1]))
+    LABELS <- data$label
+    unique_conditions <- unique(data$label)
+    norm_counts <- as.data.frame(t(object_BPSC))
+    norm_counts$labels <- as.factor(LABELS)
+    DiffMEan <- data.frame(t(aggregate(. ~ labels, data = norm_counts, FUN = mean)))
+    colnames(DiffMEan) <- DiffMEan[1,]
+    DiffMEan <- DiffMEan[-1,]
+    DiffMEan <- as.data.frame(lapply(DiffMEan, as.numeric) )
+    logFC_values <- log2(DiffMEan[, 2] / DiffMEan[, 1])
+    
     design <- model.matrix( ~ data$label)
     resbp <-
       BPSC::BPglm(
@@ -81,7 +89,7 @@ PvalueCalc = function(data, Pvaluemethod) {
         controlIds = controllds,
         design = design,
         coef = 2,
-        estIntPar = FALSE,
+        estIntPar = TRUE,
         useParallel = TRUE
       )
     FDR <- p.adjust(resbp$PVAL, method = "BH")
@@ -89,7 +97,8 @@ PvalueCalc = function(data, Pvaluemethod) {
       list(
         gene_names = names(resbp$PVAL),
         pvalue = resbp$PVAL,
-        FDR = FDR
+        FDR = FDR,
+        logFC = logFC_values
       )
     return(result_BPSC)
   }
@@ -106,19 +115,31 @@ PvalueCalc = function(data, Pvaluemethod) {
     names(grp) <- colnames(object_MAST)
     
     sca <- MAST::FromMatrix(
-      exprsArray = log2(object_MAST + 1),
+      exprsArray = log2(object_MAST + 1 + 1e-6),  # add a small pseudocount
       cData = data.frame(wellKey = names(grp),
                          grp = grp)
     )
+    
     zlmdata <-
       MAST::zlm( ~ grp, sca, method = "bayesglm", parallel = TRUE)
+    
+    # Fetch coefficients
+    coef_df <- summary(zlmdata)$datatable
+    coef_df <- subset(coef_df, contrast != "(Intercept)")
     mast <- MAST::lrTest(zlmdata, "grp")
+    mast_order <- match(rownames(mast), coef_df$primerid)
+    coef_df <- coef_df[mast_order, ]
+    # Get log fold changes
+    logFC_values <- coef_df$coef
+    
+    
     FDR  <- p.adjust(mast[, "hurdle", "Pr(>Chisq)"], method = "BH")
     
     result_MAST <-
       list(gene_names = names(mast[, "hurdle", "Pr(>Chisq)"]),
            pvalue = mast[, "hurdle", "Pr(>Chisq)"],
-           FDR = FDR)
+           FDR = FDR,
+           logFC = logFC_values)
     return(result_MAST)
   }
   
@@ -144,7 +165,8 @@ PvalueCalc = function(data, Pvaluemethod) {
     res_cpm <- DESeq2::results(object_DESeq2)
     result_DESeq2 <- list(gene_names = rownames(res_cpm),
                           pvalue = res_cpm$pvalue,
-                          FDR = res_cpm$padj)
+                          FDR = res_cpm$padj,
+                          logFC = res_cpm$log2FoldChange)
   
     return(result_DESeq2)
   }
@@ -156,7 +178,7 @@ PvalueCalc = function(data, Pvaluemethod) {
 
 #Calculates the P-value according to the requested method and returns a data frame with the expression table of the isolated genes according to the threshold.
 
-StatisticalPvalueFilter = function(data, Labels, threshold) {
+StatisticalPvalueFilter = function(data, Labels, threshold,logfc) {
   options(scipen = 999)
   obj=data
   #Labels=data[,ncol(data)]
@@ -179,7 +201,7 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
     count = 0
     PvalueTreshold = list()
     for (i in seq(1, nrow(PvalueData))) {
-      if (!is.na(PvalueData[, 3][i]) && PvalueData[, 3][i] <= threshold)  {
+      if (!is.na(PvalueData[, 3][i]) && PvalueData[, 3][i] <= threshold && abs(PvalueData[, 4][i]) >= logfc )  {
         count = count + 1
         
         PvalueTreshold[[count]] = rownames(PvalueData)[i]
@@ -193,10 +215,10 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
       data.frame(PvalueData[order(PvalueData$pvalue, decreasing = FALSE), drop = FALSE,])
     iG1 = subset(PvalueData1 ,
                  rownames(PvalueData) %in% rownames(PvalueTreshold))
-    iG = cbind((iG1[, -c(1, 3)]))
+    iG = cbind((iG1[, -c(1, 2,4)]))
     rownames(iG) = rownames(iG1)
     
-    iG <<- as.data.frame(round(iG, digits = 6))
+    iG <<- as.data.frame(round(iG, digits = 4))
     data = as.data.frame(t(data))
     neudata = data[, colnames(data) %in% row.names(PvalueTreshold)]
     
@@ -215,9 +237,12 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
     print("DESeq2_method")
     count = 0
     PvalueTreshold = list()
-    print("here")
+    print(nrow(PvalueData))
+   
     for (i in 1:nrow(PvalueData)) {
-      if (!is.na(PvalueData[, 3][i]) && PvalueData[, 3][i] <= threshold) {  #threshold
+     
+     
+      if (!is.na(PvalueData[, 3][i]) && PvalueData[, 3][i] <= threshold  && abs(PvalueData[, 4][i]) >= logfc  ) {  #threshold logfc
         print(i)
         count = count + 1
 
@@ -225,26 +250,25 @@ StatisticalPvalueFilter = function(data, Labels, threshold) {
       }
     }
     PvalueTreshold <- as.data.frame(cbind(PvalueTreshold))
-    print("here2")
     if (length(PvalueTreshold) != 0){
      
-    PvalueData=as.data.frame(PvalueData)
+    PvalueData <-as.data.frame(PvalueData)
     
     
-    PvalueData1 = data.frame(PvalueData[order(PvalueData$pval, decreasing = FALSE), drop = FALSE,])
+    PvalueData1 <- data.frame(PvalueData[order(PvalueData$pval, decreasing = FALSE), drop = FALSE,])
     
     iG1 = subset(PvalueData1 , rownames(PvalueData1) %in% PvalueTreshold[, 1])
     iG = cbind((iG1[, -c(1, 2, 4)]))
     rownames(iG) = rownames(iG1)
     
-    iG <<- as.data.frame(round(iG, digits = 6))
+    iG <<- as.data.frame(round(iG, digits = 4))
 
     neudata <- obj[, colnames(obj) %in% row.names(iG)]
     neudata<-as.data.frame(neudata)
 
     
     neudata$Labels = as.factor(Labels)
-    
+   
     return(neudata)
     }else{ showModal(modalDialog(
       title = "Message",

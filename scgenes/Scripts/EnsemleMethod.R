@@ -32,7 +32,8 @@ EnsemleMethod = function(obj, EnseLabels) {
                        DM <- input$distMethod)
     GenesList = append(GenesList, list(DATA3 = colnames(DATA3)))
   }
-  if (input$ensembleVar == "M3Dropfun") {
+  if (input$ensembleVar == "M3Drop") {
+    print( "i am here")
     DATA8 <- M3Dropfun(obj,
                        Labels = EnseLabels)
     GenesList = append(GenesList, list(DATA8 = colnames(DATA8)))
@@ -44,7 +45,7 @@ EnsemleMethod = function(obj, EnseLabels) {
     DATA4 <- SelectionFilter(
       obj,
       Labels = EnseLabels,
-      PvalueNum = input$PvalueNum
+      PvalueNum = input$PvalueNum,logfc = input$logfc
     )
     GenesList = append(GenesList, list(DATA4 = colnames(DATA4)[-ncol(DATA4)]))
   }
@@ -52,7 +53,7 @@ EnsemleMethod = function(obj, EnseLabels) {
     DATA5 <- SelectionFilter(
       obj,
       Labels = EnseLabels,
-      PvalueNum = input$PvalueNum
+      PvalueNum = input$PvalueNum,logfc = input$logfc
     )
     GenesList = append(GenesList, list(DATA5 = colnames(DATA5)[-ncol(DATA5)]))
   }
@@ -60,12 +61,12 @@ EnsemleMethod = function(obj, EnseLabels) {
     DATA6 <- SelectionFilter(
        obj,
       Labels = EnseLabels,
-      PvalueNum = input$PvalueNum
+      PvalueNum = input$PvalueNum,logfc = input$logfc
     )
     GenesList = append(GenesList, list(DATA6 = colnames(DATA6)[-ncol(DATA6)]))
   }
   if (input$ensemblePvalue == "monocle_method") {
-    DATA7 <<- SelectionFilter(
+    DATA7 <- SelectionFilter(
        obj,
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum
@@ -76,12 +77,9 @@ EnsemleMethod = function(obj, EnseLabels) {
   ####ML METHODS
   MLlist = c(
     "rf",
-    "knn",
-    "svmRadial",
     "rpart",
     "C5.0",
     "glmnet",
-    "lda",
     "bartMachine",
     "adaboost",
     "treebag",
@@ -90,7 +88,7 @@ EnsemleMethod = function(obj, EnseLabels) {
   if ((input$ensembleWrapper %in% MLlist)) {
     #MLmethodiS<-ifelse(input$Wrapper_ML_Method=="Empty", input$ML_Method,input$Wrapper_ML_Method)
     
-    DATA8 <<- SelectionFilter1(
+    DATA8 <- SelectionFilter1(
       data = obj,
       Labels = EnseLabels,
       MLmethod = input$ensembleWrapper
@@ -98,49 +96,34 @@ EnsemleMethod = function(obj, EnseLabels) {
     GenesList = append(GenesList, list(DATA8 = colnames(DATA8)))
   }
   
-  if (input$ensembleMLBased %in% MLlist) {
-    DATA9 <<- SelectionFilter1(
-      data = obj,
-      Labels = EnseLabels,
-      MLmethod =  input$ensembleMLBased
-    )
-    GenesList = append(GenesList, list(DATA9 = colnames(DATA9)))
-  }
+  # if (input$ensembleMLBased %in% MLlist) {
+  #   DATA9 <<- SelectionFilter1(
+  #     data = obj,
+  #     Labels = EnseLabels,
+  #     MLmethod =  input$ensembleMLBased
+  #   )
+  #   GenesList = append(GenesList, list(DATA9 = colnames(DATA9)))
+  # }
   
   
   GenesList <<- GenesList
+  # Combine all lists into one vector of unique gene names
+  all_genes <- unique(unlist(GenesList))
   
-
     if (length(GenesList)>=2){
       
       
+      # Create a vote object
+      vote <- create_vote(GenesList, xtype = 3, candidate = all_genes)
       
-      #
-      vote <-
-        create_vote(GenesList, xtype = 3, candidate = c(unlist(GenesList)))
+      # Conduct Borda count
       y <- borda_method(vote, modified = TRUE)
-      # 
-      # RankingResults=as.data.frame(unique(cbind(y[["other_info"]][["count_max"]])) )
-      # rownames(RankingResults)=unique(y[["candidate"]])
+       
       
       RankingResults=as.data.frame(cbind(sort(y[["other_info"]][["count_max"]],decreasing = TRUE ) )  )
-      # RankingResultsDF=data.frame(RankingResults[1:200,])
-      # rownames(RankingResultsDF)=rownames(RankingResults)[1:200]
-      
-     # RankingResults <<- unique(data.frame( y[["other_info"]][["count_max"]]))
-      #genesnames=unique(names(y[["other_info"]][["count_max"]]))
-      #rownames(RankingResults) = make.names(names(y[["other_info"]][["count_max"]]), unique = TRUE)
-      #rownames(RankingResults) =unique(genesnames)
-      
-      # RankingResultsDF <- RankingResults %>%
-      #   tibble::rownames_to_column() %>%
-      #   arrange(desc(RankingResults[, 1])) %>%
-      #   mutate(Ranking = 1:nrow(RankingResults))
-     
-      
-   print("here")
-      newdata <- as.data.frame(RankingResults[1:input$genes,]) 
-      row.names(newdata) = rownames(RankingResults)[1:input$genes]
+ 
+      newdata <- as.data.frame(RankingResults) 
+      row.names(newdata) = rownames(RankingResults)
 
       rownames(newdata)=ifelse(substr(rownames(newdata), 1, 1) == "X",substr(rownames(newdata), 2, nchar(rownames(newdata))), rownames(newdata))
       iG <- newdata
@@ -155,11 +138,10 @@ EnsemleMethod = function(obj, EnseLabels) {
       newdata <- cbind(as.data.frame(newdata), as.data.frame(as.factor(EnseLabels)) )
       print("here!!!!")
       
-      #newdata$Labels = as.factor(newdata$EnseLabels)
       print("Ensemble Method is Executed!!!")
       
       
-      FilterData<<-newdata
+      FilterData <- newdata
       
       return(FilterData)
       

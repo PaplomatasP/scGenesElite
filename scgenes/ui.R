@@ -353,12 +353,13 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             choices = c(
               "Remove Low Variance" = "Strict_Filter",
-              "Keep High Variable Genes" = "Lightweight_Filter",
+            
               "No Filter" = "Unselect"
             ),
             selected = "Strict_Filter",
             inline = TRUE,
           ),
+          
           #change the size
           tags$head(tags$style(
             HTML(
@@ -372,7 +373,16 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
           )),
           # numericInput function
           numericInput("uniqueCut", "Low Variance cutoff", 15, 0, 100),
-          numericInput("nfeatures", "High Variable nfeatures", 2000, 0, 10000)
+        
+          radioButtons (
+            "Norm",
+            "Normalization:",
+            c("Normalization" = "Normal",
+              "No-Normalization" = "No_Normal"),
+            selected = "Normal",
+            inline = TRUE
+            
+          ),
         ),
         
       ),
@@ -442,31 +452,22 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
     
         # Variable Genes Tab
         tabPanel(
-          "Variable Genes",
+          "HVGs",
           
           # ---------------sidebarPanel
           sidebarPanel(
-            radioButtons (
-              "Norm",
-              "Normalization:",
-              c("Normalization" = "Normal",
-                "No-Normalization" = "No_Normal"),
-              selected = "Normal",
-              inline = TRUE
-              
-            ),
-            tags$hr(),
+            
             fluidRow(
               column(
                 12,
                 radioButtons(
                   'VariableM',
-                  label    = "Methods:",
+                  label    = "HVGs Methods:",
                   choices = list(
                     "SCMarker"       = "SCMarker",
                     "DUBStepR"       = "DUBStepR",
                     "ScPNMF"         =  "ScPNMF",
-                    "SelfE"          = "SelfE" ,
+                    "VST"          = "SelfE" ,
                     "M3Drop"          = "M3Drop" ,
                     "None" = "NoMethod"
                   ),
@@ -584,12 +585,13 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               column(4,
                      selectInput(
                        "M3Method", "mt_method",
-                       c("fdr" = "fdr",
-                         "bon" = "bon")
+                       c("bon" = "bon",
+                         "fdr" = "fdr"
+                         )
                      )),
               column(4,
                      div(style = "color:black",
-                         "SelfE:", ), ),
+                         "VST:", ), ),
               column(4,
                      numericInput(
                        "n",
@@ -610,7 +612,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
         
         # ---------------P-value tab
         tabPanel(
-          "P-value",
+          "DEGs",
           
           # ---------------sidebarPanel
           sidebarPanel(
@@ -621,7 +623,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             radioButtons (
               "P_method",
-              "P-Value Methods:",
+              "DEGs Methods:",
               c(
                 "Wilcoxon rank sum test" = "Seurat_method",
                 "Beta-Poisson generalized linear model" = "BPSC_metchod",
@@ -641,55 +643,62 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               max = 0.99,
               step = 0.01
             ),
-            
+            numericInput(
+              "logfc",
+              "LogFC Threshold",
+              value = 1,
+              min = 0,
+              max = 5,
+              step = 0.1
+            )
             
           ),
           
         ),
         # ---------------Wrapper Based ML tab
-        tabPanel(
-          "Non Tree-based ML",
-          
-          
-          # ---------------sidebarPanel
-          sidebarPanel(
-            position = "right",
-            width = 4,
-            
-            
-            
-            
-            
-            selectInput(
-              "Wrapper_ML_Method",
-              "Non Tree Based Machine Learning Methods:",
-              c(
-                "Linear Discriminant Analysis" = "lda",
-                "Lasso and Elastic-Net Regularized Generalized Linear Models" = "glmnet",
-                "K-nearest neighbors algorithm" = "knn",
-                "Support Vector Machine-Radial" = "svmRadial",
-                "None" = "Empty"
-                
-              ),
-              selected = "Empty",
-            ),
-            numericInput(
-              "importanceLimit",
-              "Significant Threshold",
-              value = 30,
-              min = 0,
-              max = 100,
-              step = 1
-            ),
-            
-            
-            
-            
-          ) ,
-        ),
+        # tabPanel(
+        #   "Non Tree-based ML",
+        #   
+        #   
+        #   # ---------------sidebarPanel
+        #   sidebarPanel(
+        #     position = "right",
+        #     width = 4,
+        #     
+        #     
+        #     
+        #     
+        #     
+        #     selectInput(
+        #       "Wrapper_ML_Method",
+        #       "Non Tree Based Machine Learning Methods:",
+        #       c(
+        #         "Linear Discriminant Analysis" = "lda",
+        #         "Lasso and Elastic-Net Regularized Generalized Linear Models" = "glmnet",
+        #         "K-nearest neighbors algorithm" = "knn",
+        #         "Support Vector Machine-Radial" = "svmRadial",
+        #         "None" = "Empty"
+        #         
+        #       ),
+        #       selected = "Empty",
+        #     ),
+        #     numericInput(
+        #       "importanceLimit",
+        #       "Significant Threshold",
+        #       value = 30,
+        #       min = 0,
+        #       max = 100,
+        #       step = 1
+        #     ),
+        #     
+        #     
+        #     
+        #     
+        #   ) ,
+        # ),
         # ---------------Tree Based ML Tab
         tabPanel(
-          "Tree Based ML",
+          "Feature Selection",
           
           
           # ---------------sidebarPanel
@@ -701,7 +710,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             selectInput(
               "ML_Method",
-              "Tree Based Machine Learning Methods:",
+              "Feature Selection through tree-based ML models:",
               c(
                 "Random Forest Algorithm" = "rf",
                 "eXtreme Gradient Boosting" = "xgbTree",
@@ -730,7 +739,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
         # ---------------Ensemble Approach  Tab
         tabPanel(
           "Ensemble Approach",
-          
+          p("⚠ The selection parameters of the methods, which were selected in the previous tabs, remain consistent for the Ensemble approach !"),
           
           # ---------------sidebarPanel
           sidebarPanel(
@@ -739,13 +748,13 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             radioButtons(
               'ensembleVar',
-              label    = "Variable Genes Methods:",
+              label    = "HVGs Methods:",
               choices = list(
                 "SCMarker"       = "SCMarker",
                 "DUBStepR"       = "DUBStepR",
                 "ScPNMF"         =  "ScPNMF",
                 "M3Drop"          = "M3Drop" ,
-                "SelfE"          = "SelfE" ,
+                "VST"          = "SelfE" ,
                 
                 "None" = "NoMethod"
               ),
@@ -755,7 +764,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             radioButtons(
               'ensemblePvalue',
-              label    = "P-value Methods:",
+             label    = "DEGs Methods:",
               choices = list(
                 "Wilcoxon rank sum test" = "Seurat_method",
                 "Beta-Poisson generalized linear model" = "BPSC_metchod",
@@ -769,7 +778,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             
             radioButtons(
               'ensembleWrapper',
-              label    = "Tree Based Methods:",
+              label    = "Tree Based FS Methods:",
               choices = list(
                 "Random Forest Algorithm" = "rf",
                 "eXtreme Gradient Boosting" = "xgbTree",
@@ -781,23 +790,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
               selected = "NoMethod"
               
             ),
-            radioButtons(
-              'ensembleMLBased',
-              label    = "Non Tree Based Methods:",
-              choices = list(
-                "Linear Discriminant Analysis" = "lda",
-                "Lasso and Elastic-Net Regularized Generalized Linear Models" = "glmnet",
-                "K-nearest neighbors algorithm" = "knn",
-                "Support Vector Machine-Radial" = "svmRadial",
-                "None" = "NoMethod"
-              ),
-              selected = "NoMethod"
-              
-            ),
-            
-            
-            
-            
+ 
             
           ) ,
         ),
@@ -808,9 +801,6 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
       
       # -----------   Main panel for displaying outputs
       mainPanel(tableOutput("text")),
-      
-      
-      
       
       
       
@@ -858,7 +848,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
                 "Split",
                 "Heatmap Splitting:",
                 
-                choices = c("Cell Type" = "CellType",
+                choices = c("Cell Type Predict" = "CellType",
                             "State" = "labels"),
                 selected = "CellType",
                 inline = TRUE
@@ -880,7 +870,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
                      height = "400",
                      style = "margin-top: 40px;"
                    ),
-                   # margin-left: 100px;
+                  
                    tags$div(tableOutput("GenesList"), style = "margin-top: 18px; height: 40vh; width: 48vh;  overflow-x: hide;
                                overflow-y: scroll; "),
                    

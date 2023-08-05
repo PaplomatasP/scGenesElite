@@ -1,5 +1,5 @@
 InstallGit=function(){
-  
+
   devtools::install_github('davidgohel/ggiraph')
   devtools::install_github("souravc83/fastAdaboost")
   devtools::install_github("JSB-UCLA/scPNMF")

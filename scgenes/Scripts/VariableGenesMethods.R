@@ -72,7 +72,7 @@ SelfEGenes = function(obj, n, Labels) {
     obj = MSET_VarFilter[, -ncol(MSET_VarFilter)]
     print("var")
     if (input$Norm == "Normal") {
-      scale.factor <- mean(colSums(obj))
+      scale.factor <- median(colSums(obj))
       
       obj <- Seurat::LogNormalize(obj,
                                   scale.factor = scale.factor)
@@ -90,22 +90,37 @@ SelfEGenes = function(obj, n, Labels) {
       
     }
   }
+
+  obj <- as.data.frame(t(obj) )
+  #rownames(obj) <- make.names(rownames(obj))
+
+  Seraut_obj <- CreateSeuratObject(obj)
+
+  DataSeurat <-
+    FindVariableFeatures(Seraut_obj,
+                         selection.method = "vst",
+                         nfeatures = n)
+  print(n)
+  variable_feature_data <- DataSeurat@assays[["RNA"]]@meta.features
+  variable_feature_data <- variable_feature_data[order(variable_feature_data$vst.variance.standardized,decreasing = TRUE),]
+  variable_feature_data <- head(variable_feature_data, n)
+  Genes <- rownames(variable_feature_data)
   
-  obj <- as.data.frame(obj)
+  iG <- data.frame(cbind(Genes,round(variable_feature_data$vst.variance.standardized,3) ) )
+  # Set row names to be the gene names and remove the gene name column
+  rownames(iG) <- iG$Genes
+  iG$Genes <- NULL
+  # Convert the remaining column to numeric
+  iG[[1]] <- as.numeric(iG[[1]])
+  # Rename the column
+  names(iG) <- "vst.variance.standardized"
   
+  obj <- as.data.frame(t(obj))
+  neudata <<- as.data.frame(obj[, colnames(obj) %in% Genes])
+  neudata$Labels <- as.factor(Labels)
   
-  # Calling SelfE function
-  GeneIDs <- SelfE::SelfE(obj, n)
-  # Selecting genes from the data
-  newdata = obj[, GeneIDs]
-  iG = as.data.frame(matrix(ncol = 1, nrow = length(newdata)))
-  iG[, 1] <- 1:length(newdata)
-  iG = as.data.frame(iG[order(iG[, 1], decreasing = TRUE), ])
-  rownames(iG) <- colnames(newdata)
-  iG <<- iG
-  newdata = obj[, colnames(obj) %in%  rownames(iG)]
-  newdata$Labels = as.factor(Labels)
-  return(newdata)
+ 
+  return(neudata)
 }
 
 
