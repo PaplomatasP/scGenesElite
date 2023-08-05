@@ -4,7 +4,7 @@ server <- function(input, output) {
   #  shinyjs::runjs("$('navbarPage > *').css('zoom', '10%');")
   
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
-  "HI"
+
 
   # shinyjs::runjs("$(window).off('resize');")
   #loAd all necessary scripts
