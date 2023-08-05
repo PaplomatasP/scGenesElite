@@ -5,7 +5,7 @@ server <- function(input, output) {
   
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
   
-  
+
   # shinyjs::runjs("$(window).off('resize');")
   #loAd all necessary scripts
   source("./Scripts/VarReductionFilter.R", local = TRUE)
