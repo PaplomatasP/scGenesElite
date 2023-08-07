@@ -61,8 +61,7 @@ SCMarkerfun = function(data, GeneSK, CellSK, Labels) {
 }
 
 
-#### SelfE #####
-# Use the SelfE feature selection method  and return a dataframe the expression matrix of the isolated genes.
+#### VST #####
 
 SelfEGenes = function(obj, n, Labels) {
   obj = obj[, -ncol(obj)]
@@ -98,9 +97,8 @@ SelfEGenes = function(obj, n, Labels) {
 
   DataSeurat <-
     FindVariableFeatures(Seraut_obj,
-                         selection.method = "vst",
-                         nfeatures = n)
-  print(n)
+                         selection.method = "vst")
+
   variable_feature_data <- DataSeurat@assays[["RNA"]]@meta.features
   variable_feature_data <- variable_feature_data[order(variable_feature_data$vst.variance.standardized,decreasing = TRUE),]
   variable_feature_data <- head(variable_feature_data, n)
@@ -114,7 +112,7 @@ SelfEGenes = function(obj, n, Labels) {
   iG[[1]] <- as.numeric(iG[[1]])
   # Rename the column
   names(iG) <- "vst.variance.standardized"
-  
+  iG <<- iG
   obj <- as.data.frame(t(obj))
   neudata <<- as.data.frame(obj[, colnames(obj) %in% Genes])
   neudata$Labels <- as.factor(Labels)

@@ -1,4 +1,4 @@
-#Here is the main function that performs the feature selection method and visualizes the isolated genes.
+                                #Here is the main function that performs the feature selection method and visualizes the isolated genes.
 
 MethodData = function() {
   #check if the input data are rds. and do the all process ........
@@ -83,7 +83,7 @@ MethodData = function() {
                              input$ML_Method=="Empty") {
                      FilterData <- SelfEGenes(RDS_file1,
                                               Labels = RDS_file1[, ncol(RDS_file1)],
-                                              input$n)
+                                              n = input$n)
                      
                      
                    }
@@ -329,15 +329,15 @@ MethodData = function() {
       
       
       else if (input$P_method == "Empty" &
-               input$VariableM == "NoMethod" &
-               input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
-               &  input$ensembleMLBased=="NoMethod") {
+               input$VariableM == "NoMethod"   &
+               input$ensembleVar=="NoMethod" & 
+               input$ensemblePvalue=="NoMethod") {
         print("ML_Method")
         FilterData <- SelectionFilter1(
           data = CSV_file1[,-ncol(CSV_file1)],
           Labels = CSV_file1[, ncol(CSV_file1)],
           MLmethod = input$ML_Method
-          
+
         )
       }
       
@@ -355,16 +355,16 @@ MethodData = function() {
       
       else if (input$VariableM == "SelfE" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
                & input$ensembleWrapper=="NoMethod" & 
-                input$ML_Method=="Empty") {
+               input$ML_Method=="Empty") {
         FilterData <- SelfEGenes(CSV_file1,
                                  Labels = CSV_file1[, ncol(CSV_file1)],
-                                 input$n)
+                                 n = input$n)
         
         
       }
-      else if (input$VariableM == "DUBStepR" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
+      else if (input$VariableM == "DUBStepR" & input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
                & input$ensembleWrapper=="NoMethod" & 
-                input$ML_Method=="Empty") {
+               input$ML_Method=="Empty") {
         
         FilterData <- DUBStepRfun(CSV_file1,
                                   Labels = CSV_file1[, ncol(CSV_file1)])
@@ -372,25 +372,25 @@ MethodData = function() {
         
       }
       
-      else if (input$VariableM == "ScPNMF" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
+      else if (input$VariableM == "ScPNMF" & input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
                & input$ensembleWrapper=="NoMethod" & 
-                input$ML_Method=="Empty") {
+               input$ML_Method=="Empty") {
         FilterData <- scPNMFfun(CSV_file1,
                                 Labels = CSV_file1[, ncol(CSV_file1)],
                                 DM <- input$distMethod)
         
         
       }
-      else if (input$VariableM == "M3Drop"  &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
+      else if (input$VariableM == "M3Drop"  & input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
                & input$ensembleWrapper=="NoMethod" & 
-                input$ML_Method=="Empty") {
+               input$ML_Method=="Empty") {
         
         FilterData <- M3Dropfun(CSV_file1,
                                 Labels = CSV_file1[, ncol(CSV_file1)])
       }
       else if  (input$VariableM == "NoMethod"  & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
                 & input$ensembleWrapper=="NoMethod" & input$P_method!="Empty"& 
-                 input$ML_Method=="Empty"){
+                input$ML_Method=="Empty"){
         FilterData <- SelectionFilter( 
           data = CSV_file1[,-ncol(CSV_file1)],
           Labels = CSV_file1[, ncol(CSV_file1)],
