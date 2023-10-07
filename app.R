@@ -96,9 +96,6 @@ server <- function(input, output) {
   # active the enrichments' Analysis process after click the button
   #Here we load all available ontologies and do a preprocessing in order to display them in bar chart form.
   output$Enrichment = eventReactive(input$click1,  {
-    FilterData <- MethodData()
-    iG <- FilterData$ig
-    rownames(iG) <- tools::toTitleCase(tolower(rownames(iG)))
     if (input$all) {
       withProgress(message = 'Please wait........', value = 0, {
         {
@@ -118,7 +115,7 @@ server <- function(input, output) {
               "GO_Molecular_Function_2021",
               "GO_Cellular_Component_2021",
               "MGI_Mammalian_Phenotype_Level_4_2021",
-              "Human_Phenoty pe_Ontology",
+              "Human_Phenotype_Ontology",
               "Jensen_DISEASES",
               "DisGeNET",
               "DSigDB",
@@ -315,7 +312,6 @@ server <- function(input, output) {
     
     #Preprocessing to load only the requested ontologies and  display them in bar chart format
     else{
-      
       withProgress(message = 'Please wait........', value = 0
                    , {
                      {
@@ -327,7 +323,6 @@ server <- function(input, output) {
                      dbs = dbs1[c(oo)]
                      
                      if (websiteLive) {
-                     
                        enriched <- enrichr(rownames(iG)[1:input$genes1], dbs)
                        
                        
@@ -511,7 +506,6 @@ server <- function(input, output) {
   
   
   output$KEGG <- renderDT({
-    
     datatable(PathsData, options = list(
       scrollY = "200px",
       scrollCollapse = TRUE,
@@ -540,10 +534,9 @@ server <- function(input, output) {
         incProgress(8 / 10)
         Sys.sleep(0.10)
       }
-      FilterData <- MethodData()
-      iG <- FilterData$ig
+      
       # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
-      ScaledData <- iGlexikon(iG, input$GENEid,input$organismus)
+      ScaledData <- iGlexikon(iG, input$GENEid)
     
       plot_pathview(gene.data =ScaledData,
                     pathway.id = input$inText,
@@ -583,21 +576,18 @@ server <- function(input, output) {
       # connect the " lysis" button and active  by clicking .
       output$text = eventReactive(input$click, {
         FilterData <- MethodData()
-        iG <- FilterData$ig
-        NewData = FilterData$newdata 
+        
         
         #Plot the Similarity Graph
         output$graph <- renderVisNetwork({
           text3()
           
           if (input$graph1) {
-            FilterData <- MethodData()
-            NewData = FilterData$newdata 
-            iG <- FilterData$ig
+          
             
             isolate({
            
-              GraphsFun(NewData,iG)
+              GraphsFun(FilterData)
             })
             
             
@@ -614,12 +604,8 @@ server <- function(input, output) {
       output$PPInetwork <- renderPlot(execOnResize = FALSE, {
         text3()
         if (input$PPInetwork1) {
-          FilterData <- MethodData()
-          iG <- FilterData$ig
-         
           print("i am here to PPInetwork1")
           isolate({
-           
             PPInetwork(iG)
           })
           

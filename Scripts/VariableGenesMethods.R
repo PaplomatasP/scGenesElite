@@ -30,18 +30,15 @@ SCMarkerfun = function(data, GeneSK, CellSK, Labels) {
   
   obj <- as.data.frame(t(obj))
  # colnames(obj) = Labels
-
+  
   res <-
     ModalFilter(
       data = obj,
-      geneK = 10,
-      cellK = 10,
+      geneK = GeneSK,
+      cellK = CellSK,
       cutoff = 2,
       width = 1
     )# default width = 1 for UMI data, width =2 for TPM data.
-  
-
-  
   res = SCMarker::GeneFilter(obj = res)
   res= SCMarker::getMarker(obj=res,k=150,n=20)
   genes = res[["marker"]]
@@ -54,13 +51,13 @@ SCMarkerfun = function(data, GeneSK, CellSK, Labels) {
   iG = iG[order(iG[, 1], decreasing = TRUE), ]
   
   
-  iG <- as.data.frame(iG)
+  iG <<- as.data.frame(iG)
   
   
   newdata <- data[, colnames(data) %in%  genes]
   newdata$Labels <- as.factor(Labels)
   
-  return(list(ig=iG, newdata=newdata))
+  return(newdata)
 }
 
 
@@ -115,13 +112,13 @@ SelfEGenes = function(obj, n, Labels) {
   iG[[1]] <- as.numeric(iG[[1]])
   # Rename the column
   names(iG) <- "vst.variance.standardized"
-  iG <- iG
+  iG <<- iG
   obj <- as.data.frame(t(obj))
-  neudata <- as.data.frame(obj[, colnames(obj) %in% Genes])
+  neudata <<- as.data.frame(obj[, colnames(obj) %in% Genes])
   neudata$Labels <- as.factor(Labels)
   
  
-  return(list(ig=iG, newdata=neudata))
+  return(neudata)
 }
 
 
@@ -251,12 +248,11 @@ DUBStepRfun = function(data, Labels) {
   
   rownames(iG) = genes
   
-  iG <- iG
+  iG <<- iG
   
   newdata = data[, colnames(data) %in% genes]
   newdata$Labels = as.factor(Labels)
-  return(list(ig=iG, newdata=newdata))
-  
+  return(newdata)
 }
 
 
@@ -366,11 +362,11 @@ scPNMFfun = function(data, Labels, DM) {
     )
     iG = as.data.frame(Score[rownames(Score) %in%  ig[["InfoGene"]]  ,])
   rownames(iG) = ig[["InfoGene"]]
-  iG <- iG[order(iG[, 1], decreasing = TRUE), , drop = FALSE]
+  iG <<- iG[order(iG[, 1], decreasing = TRUE), , drop = FALSE]
   
   newdata = data[, colnames(data) %in%  ig[["InfoGene"]]]
   newdata$Labels = as.factor(Labels)
-  return(list(ig=iG, newdata=newdata))
+  return(newdata)
 }
 
 # Use the M3Drop feature selection method and return a dataframe the expression matrix of the isolated genes.
@@ -453,11 +449,11 @@ M3Dropfun = function(data, Labels) {
   }
   
   
-  iG <-
+  iG <<-
     DropsGenes[order(DropsGenes[, 4], decreasing = FALSE), 4 , drop = FALSE]
   
   newdata = data[, colnames(data) %in%  rownames(iG)]
   newdata$Labels = as.factor(Labels)
   newdata <- newdata
-  return(list(ig=iG, newdata=newdata))
+  return(newdata)
 }
