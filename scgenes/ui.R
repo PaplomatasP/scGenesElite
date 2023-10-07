@@ -139,16 +139,20 @@ ui <- #fluidPage(div(class = "tab-content",
           br(),
           br(),
           p(
-            "The app offers a flexible platform for the identification of dominant genes in a single-cell RNA-sequencing (scRNA-seq) dataset which operate as disease biomarkers.
-          It includes three different types of gene selection methods, exploiting the statistical aspect, the machine-leaning aspect along with state-of-the-art feature selection methods tailored for scRNA-seq data.
-          The feature selection operation modes include 20 different methodologies covering a broad range of such approaches. The extracted gene list is further examined for enrichment in various biological and pharmacological features
-          including (i) pathway terms, (ii) gene ontology (GO) terms of molecular function, biological processes and cellular components, (iii) disease terms, (iv) drug substances based on the EnrichR tool.
-          Snapshots of KEGG pathway maps enhance the investigation of the exported genes as biomarkers and provide insight into the functional and structural characteristics of the biological system under study.
-          The final tab offers the user the opportunity to undertake a protein-protein interaction (PPI) network analysis and similarity graph analysis. The PPI network analysis is aimed at determining the functional 
-            relationships between proteins by exploring the interactions between the proteins in a biological system. This information can facilitate a more comprehensive appreciation of the biological system's overall functioning and provide valuable insights into the mechanisms of diseases and potential drug targets.
-            The similarity graph analysis,
-            on the other hand, enables the identification of molecular modules within genetic networks through the assessment of the similarity between gene interaction profiles within a cell."
-           
+          #   "The app offers a flexible platform for the identification of dominant genes in a single-cell RNA-sequencing (scRNA-seq) dataset which operate as disease biomarkers.
+          # It includes three different types of gene selection methods, exploiting the statistical aspect, the machine-leaning aspect along with state-of-the-art feature selection methods tailored for scRNA-seq data.
+          # The feature selection operation modes include 15 different methodologies covering a broad range of such approaches. The extracted gene list is further examined for enrichment in various biological and pharmacological features
+          # including (i) pathway terms, (ii) gene ontology (GO) terms of molecular function, biological processes and cellular components, (iii) disease terms, (iv) drug substances based on the EnrichR tool.
+          # Snapshots of KEGG pathway maps enhance the investigation of the exported genes as biomarkers and provide insight into the functional and structural characteristics of the biological system under study.
+          # The final tab offers the user the opportunity to undertake a protein-protein interaction (PPI) network analysis and similarity graph analysis. The PPI network analysis is aimed at determining the functional 
+          #   relationships between proteins by exploring the interactions between the proteins in a biological system. This information can facilitate a more comprehensive appreciation of the biological system's overall functioning and provide valuable insights into the mechanisms of diseases and potential drug targets.
+          #   The similarity graph analysis,
+          #   on the other hand, enables the identification of molecular modules within genetic networks through the assessment of the similarity between gene interaction profiles within a cell."
+            " Single-cell RNA-sequencing has transformed biomedical research, yet it faces computational analysis challenges.
+            Navigating the vast data dimensions poses several issues, with gene selection methods being paramount. 
+            Our platform, scGenesElite, adeptly pinpoints dominant genes within scRNA-seq datasets, integrating over 15 tailored feature extraction techniques. 
+            A standout feature of this app is its ensemble approach, which empowers users to craft their unique method by amalgamating one technique from each category. This tool offers an in-depth analysis of top genes, gauging their predictive accuracy and their association with various biological and drug-related ontologies. Additionally, visual aids like KEGG pathways and PPI networks offer a holistic perspective on the identified genes. 
+            Given its wide-ranging functionalities, scGenesElite stands as a comprehensive guide for uncovering and understanding transcriptional markers for intricate diseases through scRNA-seq research."
           ),
           
           
@@ -320,17 +324,17 @@ ui <- #fluidPage(div(class = "tab-content",
                            br(),
                            h5(
                              div(style = "color:blue",
-                                 strong("1.Remove Low Variance:"), ),
+                                 strong("Remove Low Variance:"), ),
                              "
 Using the nearZeroVar function from R package:Caret identifies predictors with one unique value (zero variance predictors) or predictors with both of the following characteristics: they have a small number of unique values compared to the number of samples and a high frequency of the most frequent value. A threshold option is provided as a cutoff for the percentage of distinct values in relation to the total number of samples in the dataset.
 " ,
                              br(),
                              div(style = "color:blue",
-                                 strong("2.Keep High Variable Genes :"), ),
+                                 strong("Normalization :"), ),
                              "
-The FindVariableFeatures function of the seraut package is utilized to reduce the number of genes based on their <<high variability>> within the dataset. The user can specify a threshold, which corresponds to the exact number of genes to be retained for further analysis. This function is a useful tool for identifying the most informative genes that are likely to have the greatest impact on the outcome of the analysis.
+we utilize the Seurat package for data normalization, a crucial step in single-cell RNA sequencing analysis. Specifically, we determine a scaling factor based on the mean of the column sums of the dataset. This scaling factor is then used in the LogNormalize function from Seurat to perform log normalization on the data.
 "
-                           ),
+                            ),
                            
                            placement = "bottom-start",
                            arrow = TRUE,
@@ -426,7 +430,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             h3(strong('Information')),
             br(),
             h5(
-              "In this suite of analysis tools, a wide range of strategies are provided for the analysis of the data. These include methods for identifying variable genes based on single cell RNA sequencing, statistical approaches based on p-value threshold, and wrapper and tree-based machine learning models. A unique feature of this suite is the ability for the user to create their own ensemble method by combining one or more of these methods. Additionally, various threshold options are available for each method (for more information, consult the tutorial provided). It should be noted that each method employs a distinct approach and may require varying amounts of computational resources, depending on the size of the data. Therefore, it is recommended that the user employs preprocessing filters to reduce the data size and improve the reliability of the results. The normalization button allows the user to normalize their data prior to analysis. On the Ensemble tab, the options selected from the previous tabs for the various methods are applied. The genes identified through the analysis are depicted in a visual format utilizing both a barplot and a heatmap. The heatmap specifically employs cell type or State labeling as a means of organizing and presenting the data. Furthermore, a classification K-nearest neighbors (K-nn) model is executed to assess the ability of the model to accurately classify based solely on the isolated genes. The results of the K-NN analysis are presented in a comprehensive manner through the utilization of a confusion matrix and a data table."
+              "In this suite of analysis tools, a wide range of strategies are provided for the analysis of the data. These include methods for identifying variable genes based on single cell RNA sequencing, statistical approaches based on p-value and LogFC threshold, and Feature Selection through tree-based ML models. A unique feature of this suite is the ability for the user to create their own ensemble method by combining one or more of these methods. Additionally, various threshold options are available for each method (for more information, consult the tutorial provided). It should be noted that each method employs a distinct approach and may require varying amounts of computational resources, depending on the size of the data. Therefore, it is recommended that the user employs preprocessing filters to reduce the data size and improve the reliability of the results. The normalization button allows the user to normalize their data prior to analysis. On the Ensemble tab, the options selected from the previous tabs for the various methods are applied. The genes identified through the analysis are depicted in a visual format utilizing both a barplot and a heatmap. The heatmap specifically uses cell type predict or State labeling as a method to organize and present the data. The state retains the labels provided in the dataset by the user, or the cell type prediction utilizes the singleR package for cell type annotation. Furthermore, a classification K-nearest neighbors (K-nn) model is executed to assess the ability of the model to accurately classify based solely on the isolated genes. The results of the K-NN analysis are presented in a comprehensive manner through the utilization of a confusion matrix and a data table."
             )
             ,
             
@@ -725,7 +729,7 @@ The FindVariableFeatures function of the seraut package is utilized to reduce th
             numericInput(
               "importanceLimit",
               "Significant Threshold",
-              value = 30,
+              value = 10,
               min = 0,
               max = 100,
               step = 1

@@ -1,9 +1,13 @@
 
 #Create a Knn model , and plot the confusion Matrix
-KnnClassifier = function(data,
+KnnClassifier = function(data,iG,
                             Labels
                             ) {
+ 
 data$Labels = as.factor(Labels)
+
+by_iG = as.data.frame(head(iG, input$genes) ) #input$genes
+data = data[,rownames(by_iG) %in% colnames(data)]
 
 partitionData <-
   caret::createDataPartition(data$Labels, p = 0.8, list = FALSE)
@@ -63,11 +67,11 @@ ConfMatrixPlot=function(ConfMatrix){
                                  na.value = "grey50",
                                  guide = "colourbar",
                                  aesthetics = "fill")+
-    ggplot2::geom_text(aes(label = paste("",Freq,",",Perc,"%")), color = 'black', size = 7)+ 
+    ggplot2::geom_text(aes(label = paste(Freq, "\n", Perc,"%")), color = 'black', size = 7)+  # Adjusted size and added newline
     ggplot2::theme_bw() +
     ggplot2::guides(fill=FALSE) 
   gridExtra::grid.arrange(cm_d_p, cm_st_p,nrow = 1, ncol = 2, 
-                          top= grid::textGrob("Confusion Matrix",x = 0.5, y = 0.6, just = "center", gp=grid::gpar(fontsize=19,font=1)))
+                          top= grid::textGrob("Confusion Matrix",x = 0.5, y = 0.6, just = "center", gp=grid::gpar(fontsize=21,font=1)))
   
 }
 

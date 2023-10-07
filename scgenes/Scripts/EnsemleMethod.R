@@ -5,7 +5,7 @@
 EnsemleMethod = function(obj, EnseLabels) {
   GenesList = list()
   ####Variable METHODS
-  
+ 
   if (input$ensembleVar == "SCMarker") {
     DATA <- SCMarkerfun(
       obj,
@@ -13,30 +13,34 @@ EnsemleMethod = function(obj, EnseLabels) {
       GeneSK = input$geneK,
       CellSK = input$cellK
     )
-    GenesList = append(GenesList, list(DATA = colnames(DATA)))
+    DATA <- DATA$newdata
+    GenesList = append(GenesList, list(DATA = colnames(DATA)[-ncol(DATA)]))
   }
   if (input$ensembleVar == "SelfE") {
     DATA1 <- SelfEGenes(obj,
                         Labels =EnseLabels,
                         input$n)
-    GenesList = append(GenesList, list(DATA1 = colnames(DATA1)))
+    DATA1 <-DATA1$newdata
+    GenesList = append(GenesList, list(DATA1 = colnames(DATA1)[-ncol(DATA1)]))
   }
   if (input$ensembleVar == "DUBStepR") {
     DATA2 <- DUBStepRfun(obj,Labels = EnseLabels)
-    
-    GenesList = append(GenesList, list(DATA2 = colnames(DATA2)))
+    DATA2 <-DATA2$newdata
+    GenesList = append(GenesList, list(DATA2 = colnames(DATA2)[-ncol(DATA2)]))
   }
   if (input$ensembleVar == "ScPNMF") {
     DATA3 <- scPNMFfun(obj,
                        Labels = EnseLabels,
                        DM <- input$distMethod)
-    GenesList = append(GenesList, list(DATA3 = colnames(DATA3)))
-  }
+    DATA3 <-DATA3$newdata
+    GenesList = append(GenesList, list(DATA3 = colnames(DATA3)[-ncol(DATA3)]))
+  } 
   if (input$ensembleVar == "M3Drop") {
     print( "i am here")
     DATA8 <- M3Dropfun(obj,
                        Labels = EnseLabels)
-    GenesList = append(GenesList, list(DATA8 = colnames(DATA8)))
+    DATA8 <-DATA8$newdata
+    GenesList = append(GenesList, list(DATA8 = colnames(DATA8)[-ncol(DATA8)]))
   }
   
   ####PVALUE METHODS
@@ -47,6 +51,7 @@ EnsemleMethod = function(obj, EnseLabels) {
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum,logfc = input$logfc
     )
+    DATA4 <- DATA4$newdata
     GenesList = append(GenesList, list(DATA4 = colnames(DATA4)[-ncol(DATA4)]))
   }
   if (input$ensemblePvalue == "BPSC_metchod") {
@@ -55,6 +60,7 @@ EnsemleMethod = function(obj, EnseLabels) {
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum,logfc = input$logfc
     )
+    DATA5 <- DATA5$newdata
     GenesList = append(GenesList, list(DATA5 = colnames(DATA5)[-ncol(DATA5)]))
   }
   if (input$ensemblePvalue == "MAST_method") {
@@ -63,6 +69,7 @@ EnsemleMethod = function(obj, EnseLabels) {
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum,logfc = input$logfc
     )
+    DATA6 <- DATA6$newdata
     GenesList = append(GenesList, list(DATA6 = colnames(DATA6)[-ncol(DATA6)]))
   }
   if (input$ensemblePvalue == "monocle_method") {
@@ -71,6 +78,7 @@ EnsemleMethod = function(obj, EnseLabels) {
       Labels = EnseLabels,
       PvalueNum = input$PvalueNum
     )
+    DATA7 <- DATA7$newdata
     GenesList = append(GenesList, list(DATA7 = colnames(DATA7)[-ncol(DATA7)]))
   }
   
@@ -88,12 +96,13 @@ EnsemleMethod = function(obj, EnseLabels) {
   if ((input$ensembleWrapper %in% MLlist)) {
     #MLmethodiS<-ifelse(input$Wrapper_ML_Method=="Empty", input$ML_Method,input$Wrapper_ML_Method)
     
-    DATA8 <- SelectionFilter1(
+    DATA9 <- SelectionFilter1(
       data = obj,
       Labels = EnseLabels,
       MLmethod = input$ensembleWrapper
     )
-    GenesList = append(GenesList, list(DATA8 = colnames(DATA8)))
+    DATA9 <- DATA9$newdata
+    GenesList = append(GenesList, list(DATA9 = colnames(DATA9)[-ncol(DATA9)]))
   }
   
   # if (input$ensembleMLBased %in% MLlist) {
@@ -106,7 +115,7 @@ EnsemleMethod = function(obj, EnseLabels) {
   # }
   
   
-  GenesList <<- GenesList
+  GenesList <- GenesList
   # Combine all lists into one vector of unique gene names
   all_genes <- unique(unlist(GenesList))
   
@@ -134,7 +143,7 @@ EnsemleMethod = function(obj, EnseLabels) {
     
       iG=data.frame(iG[which(rownames(iG) %in% genesNames),] )
       rownames(iG)=Genes
-      iG <<- iG
+      iG <- iG
       newdata <- cbind(as.data.frame(newdata), as.data.frame(as.factor(EnseLabels)) )
       print("here!!!!")
       
@@ -143,7 +152,7 @@ EnsemleMethod = function(obj, EnseLabels) {
       
       FilterData <- newdata
       
-      return(FilterData)
+      return(list(ig=iG, newdata=newdata))
       
     }else {
       
@@ -154,5 +163,4 @@ EnsemleMethod = function(obj, EnseLabels) {
     }
   EnsembledData=EnsembledData
   return(EnsembledData)
- 
 }

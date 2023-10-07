@@ -218,14 +218,14 @@ StatisticalPvalueFilter = function(data, Labels, threshold,logfc) {
     iG = cbind((iG1[, -c(1, 2,4)]))
     rownames(iG) = rownames(iG1)
     
-    iG <<- as.data.frame(round(iG, digits = 4))
+    iG <- as.data.frame(round(iG, digits = 4))
     data = as.data.frame(t(data))
     neudata = data[, colnames(data) %in% row.names(PvalueTreshold)]
     
     neudata = as.data.frame(neudata)
     
     neudata$Labels = as.factor(Labels)
-    return(neudata)
+    return(list(ig=iG, newdata=neudata))
     }else{ showModal(modalDialog(
       title = "Message",
       "Please consider increasing the P-value threshold!!!",
@@ -261,7 +261,7 @@ StatisticalPvalueFilter = function(data, Labels, threshold,logfc) {
     iG = cbind((iG1[, -c(1, 2, 4)]))
     rownames(iG) = rownames(iG1)
     
-    iG <<- as.data.frame(round(iG, digits = 4))
+    iG <- as.data.frame(round(iG, digits = 4))
 
     neudata <- obj[, colnames(obj) %in% row.names(iG)]
     neudata<-as.data.frame(neudata)
@@ -269,7 +269,7 @@ StatisticalPvalueFilter = function(data, Labels, threshold,logfc) {
     
     neudata$Labels = as.factor(Labels)
    
-    return(neudata)
+    return(list(ig=iG, newdata=neudata))
     }else{ showModal(modalDialog(
       title = "Message",
       "Please consider increasing the P-value threshold!!!",

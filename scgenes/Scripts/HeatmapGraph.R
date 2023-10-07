@@ -1,7 +1,7 @@
 
 
 #Create a complexHeatmap of the isolated genes and plot it.
-complexHeatMapFun = function(data,Plot=TRUE) {
+complexHeatMapFun = function(data,iG, Plot=TRUE) {
   withProgress(message = 'Please wait........', value = 0, {
     {
       incProgress(2 / 10)
@@ -10,6 +10,7 @@ complexHeatMapFun = function(data,Plot=TRUE) {
       Labels = as.factor(data[, ncol(data)])
       data <- data[, -ncol(data)]
       print(dim(data))
+      
       #Cells=rownames(data)
     }
 
@@ -19,27 +20,40 @@ complexHeatMapFun = function(data,Plot=TRUE) {
       if (input$organismus == "Human") {
         print("Human")
         ref <- celldex::HumanPrimaryCellAtlasData()
-        
         data = as.data.frame(t(data))
         results <-
           SingleR(test = data,
                   ref = ref,
                   labels = ref$label.main)
         data = as.data.frame(t(data))
-        data$singlr_labels <- results$labels
+        
+        if (input$Split == "CellType") {
+          data$singlr_labels <- results$labels
+          
+          
+          HeatmapLabel = as.factor(data$singlr_labels)
+          data = aggregate(data[, 1:length(data[, -ncol(data)])], list(data$singlr_labels), FUN =
+                             mean)
+          
+        } else{
+          HeatmapLabel = as.factor(Labels)
+          data$singlr_labels <- HeatmapLabel
+          data = aggregate(data[, 1:length(data[, -ncol(data)])], list(data$singlr_labels), FUN =
+                             mean)
+          print(HeatmapLabel)
+        }
         
         
-        LabelsCellType = as.factor(data$singlr_labels)
-        data = aggregate(data[, 1:length(data[, -ncol(data)])], list(data$singlr_labels), FUN =
-                           mean)
-        
-        data = as.matrix(t(data))
+        data <- as.matrix(t(data))
         colnames(data) = data[1, ]
         data = data[-1, ]
+        genes=rownames(data)
         data <-
           data.frame(apply(data, 2, function(x)
             as.numeric(as.character(x))))
-        rownames(data) = rownames(iG)
+        
+        rownames(data) = genes  #rownames(iG)
+        data=data[order(rowMeans(data) ,decreasing = TRUE),]
         
       } else{
         ref <- celldex::MouseRNAseqData()
@@ -64,6 +78,7 @@ complexHeatMapFun = function(data,Plot=TRUE) {
           data$singlr_labels <- HeatmapLabel
           data = aggregate(data[, 1:length(data[, -ncol(data)])], list(data$singlr_labels), FUN =
                              mean)
+          print(HeatmapLabel)
         }
         
         
@@ -181,7 +196,8 @@ complexHeatMapFun = function(data,Plot=TRUE) {
 }
 #Create a Similarity graph and plot it.
 
-GraphsFun = function(data) {
+GraphsFun = function(data,iG) {
+
   withProgress(message = 'Please wait........', value = 0, {
     {
       incProgress(2 / 10)
@@ -325,6 +341,7 @@ GraphsFun = function(data) {
 
 #function to create a PPI network analysis to the isolated genes.
 PPInetwork = function(Genes) {
+  iG <- Genes
   withProgress(message = 'Please wait........', value = 0, {
     {
       incProgress(2 / 10)
