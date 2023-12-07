@@ -1,6 +1,6 @@
 source("ui.R", local = TRUE)
 # Define server logic to read selected file ----
-server <- function(input, output,session) { 
+server <- function(input, output) { #,session
   #  shinyjs::runjs("$('navbarPage > *').css('zoom', '10%');")
   
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
@@ -21,6 +21,12 @@ server <- function(input, output,session) {
   source('./Scripts/MainSelectionFun.R', local = TRUE)
   #Load the KEGG pahtway dataframe
   Hpaths = readRDS("./data/KEGGpaths.rds")
+
+  observeEvent(input$click, {
+    # Call MethodData and save the result to an RDS file
+    FilterData <- MethodData()
+    saveRDS(FilterData, "FilterData.rds")
+  })
   
   # Download the example data from github repository
   output$Example <- downloadHandler(
@@ -108,14 +114,14 @@ server <- function(input, output,session) {
     NewData = FilterData$newdata
     
   
-  # Delete the file when the user session ends
-  observe({
-    session$onSessionEnded(function() {
-      if (file.exists("FilterData.rds")) {
-        file.remove("FilterData.rds")
-      }
-    })
-  })
+  #Delete the file when the user session ends
+  # observe({
+  #   session$onSessionEnded(function() {
+  #     if (file.exists("FilterData.rds")) {
+  #      file.remove("FilterData.rds")
+  #     }
+  #   })
+  # })
     
     rownames(iG) <- tools::toTitleCase(tolower(rownames(iG)))
     if (input$all) {
@@ -575,24 +581,24 @@ server <- function(input, output,session) {
       
       
       # Delete the file when the user session ends
-      observe({
-        session$onSessionEnded(function() {
-          if (file.exists("FilterData.rds")) {
-            file.remove("FilterData.rds")
-          }
-        })
-      })
+     #  observe({
+     #    session$onSessionEnded(function() {
+     #      if (file.exists("FilterData.rds")) {
+     # #       file.remove("FilterData.rds")
+     #      }
+     #    })
+     #  })
      
       
       
       # Delete the file when the user session ends
-      observe({
-        session$onSessionEnded(function() {
-          if (file.exists("FilterData.rds")) {
-            file.remove("FilterData.rds")
-          }
-        })
-      })
+      # observe({
+      #   session$onSessionEnded(function() {
+      #     if (file.exists("FilterData.rds")) {
+      #    #   file.remove("FilterData.rds")
+      #     }
+      #   })
+      # })
       
       # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
       ScaledData <- iGlexikon(iG, input$GENEid,input$organismus)
@@ -649,13 +655,13 @@ server <- function(input, output,session) {
         
         
         # Delete the file when the user session ends
-        observe({
-          session$onSessionEnded(function() {
-            if (file.exists("FilterData.rds")) {
-              file.remove("FilterData.rds")
-            }
-          })
-        })
+        # observe({
+        #   session$onSessionEnded(function() {
+        #     if (file.exists("FilterData.rds")) {
+        # #      file.remove("FilterData.rds")
+        #     }
+        #   })
+        # })
         
         #Plot the Similarity Graph
         output$graph <- renderVisNetwork({
@@ -677,13 +683,13 @@ server <- function(input, output,session) {
             
             
             # Delete the file when the user session ends
-            observe({
-              session$onSessionEnded(function() {
-                if (file.exists("FilterData.rds")) {
-                  file.remove("FilterData.rds")
-                }
-              })
-            })
+            # observe({
+            #   session$onSessionEnded(function() {
+            #     if (file.exists("FilterData.rds")) {
+            #  #     file.remove("FilterData.rds")
+            #     }
+            #   })
+            # })
             
             isolate({
            
@@ -719,13 +725,13 @@ server <- function(input, output,session) {
           
           
           # Delete the file when the user session ends
-          observe({
-            session$onSessionEnded(function() {
-              if (file.exists("FilterData.rds")) {
-                file.remove("FilterData.rds")
-              }
-            })
-          })
+          # observe({
+          #   session$onSessionEnded(function() {
+          #     if (file.exists("FilterData.rds")) {
+          #  #     file.remove("FilterData.rds")
+          #     }
+          #   })
+          # })
          
           print("i am here to PPInetwork1")
           isolate({
@@ -737,8 +743,18 @@ server <- function(input, output,session) {
         }
       })
     }
+    
   })
+  
+  onStop(function() {
+    if (file.exists("FilterData.rds")) {
+      file.remove("FilterData.rds")
+    }
+  })
+  # Clean the environment
+  rm(list = ls(), envir = globalenv())
 }
 
 #  Run the app ----
 shinyApp(ui, server)
+
