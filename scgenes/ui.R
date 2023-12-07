@@ -222,7 +222,7 @@ ui <- #fluidPage(div(class = "tab-content",
             
             choices = c("H.sapiens" = "Human",
                         "M. musculus" = "Mouse"),
-            selected = "Human",
+            selected = "Mouse",
             inline = TRUE
           ),
           
