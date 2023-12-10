@@ -1,6 +1,6 @@
 source("ui.R", local = TRUE)
 # Define server logic to read selected file ----
-server <- function(input, output) { #,session
+server <- function(input, output) { 
   #  shinyjs::runjs("$('navbarPage > *').css('zoom', '10%');")
   
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
@@ -21,12 +21,6 @@ server <- function(input, output) { #,session
   source('./Scripts/MainSelectionFun.R', local = TRUE)
   #Load the KEGG pahtway dataframe
   Hpaths = readRDS("./data/KEGGpaths.rds")
-
-  observeEvent(input$click, {
-    # Call MethodData and save the result to an RDS file
-    FilterData <- MethodData()
-    saveRDS(FilterData, "FilterData.rds")
-  })
   
   # Download the example data from github repository
   output$Example <- downloadHandler(
@@ -55,7 +49,7 @@ server <- function(input, output) { #,session
     }
     
   )
-
+  
   #Read the import .rds dataset and visualize it.
   output$Rvalue <- renderTable({
     req(input$rdsFile)
@@ -94,36 +88,14 @@ server <- function(input, output) { #,session
     
   })
   
- 
+  
+  
+  
+  
+  
   # active the enrichments' Analysis process after click the button
   #Here we load all available ontologies and do a preprocessing in order to display them in bar chart form.
-  
   output$Enrichment = eventReactive(input$click1,  {
-    
-    # Check if the file exists
-    if (file.exists("FilterData.rds")) {
-      FilterData <- readRDS("FilterData.rds")
-      # Don't remove it here
-    } else {
-      FilterData <- MethodData()
-      # Save the result to the file for later use
-      saveRDS(FilterData, "FilterData.rds")
-    }
-    
-    iG <- FilterData$ig
-    NewData = FilterData$newdata
-    
-  
-  #Delete the file when the user session ends
-  # observe({
-  #   session$onSessionEnded(function() {
-  #     if (file.exists("FilterData.rds")) {
-  #      file.remove("FilterData.rds")
-  #     }
-  #   })
-  # })
-    
-    rownames(iG) <- tools::toTitleCase(tolower(rownames(iG)))
     if (input$all) {
       withProgress(message = 'Please wait........', value = 0, {
         {
@@ -143,7 +115,7 @@ server <- function(input, output) { #,session
               "GO_Molecular_Function_2021",
               "GO_Cellular_Component_2021",
               "MGI_Mammalian_Phenotype_Level_4_2021",
-              "Human_Phenoty pe_Ontology",
+              "Human_Phenotype_Ontology",
               "Jensen_DISEASES",
               "DisGeNET",
               "DSigDB",
@@ -340,7 +312,6 @@ server <- function(input, output) { #,session
     
     #Preprocessing to load only the requested ontologies and  display them in bar chart format
     else{
-      
       withProgress(message = 'Please wait........', value = 0
                    , {
                      {
@@ -352,7 +323,6 @@ server <- function(input, output) { #,session
                      dbs = dbs1[c(oo)]
                      
                      if (websiteLive) {
-                     
                        enriched <- enrichr(rownames(iG)[1:input$genes1], dbs)
                        
                        
@@ -536,7 +506,6 @@ server <- function(input, output) { #,session
   
   
   output$KEGG <- renderDT({
-    
     datatable(PathsData, options = list(
       scrollY = "200px",
       scrollCollapse = TRUE,
@@ -566,42 +535,8 @@ server <- function(input, output) { #,session
         Sys.sleep(0.10)
       }
       
-      # Check if the file exists
-      if (file.exists("FilterData.rds")) {
-        FilterData <- readRDS("FilterData.rds")
-        # Don't remove it here
-      } else {
-        FilterData <- MethodData()
-        # Save the result to the file for later use
-        saveRDS(FilterData, "FilterData.rds")
-      }
-      
-      iG <- FilterData$ig
-      NewData = FilterData$newdata
-      
-      
-      # Delete the file when the user session ends
-     #  observe({
-     #    session$onSessionEnded(function() {
-     #      if (file.exists("FilterData.rds")) {
-     # #       file.remove("FilterData.rds")
-     #      }
-     #    })
-     #  })
-     
-      
-      
-      # Delete the file when the user session ends
-      # observe({
-      #   session$onSessionEnded(function() {
-      #     if (file.exists("FilterData.rds")) {
-      #    #   file.remove("FilterData.rds")
-      #     }
-      #   })
-      # })
-      
       # A dictionary for translating gene ID to a gene symbol before executing the KEGG map process.
-      ScaledData <- iGlexikon(iG, input$GENEid,input$organismus)
+      ScaledData <- iGlexikon(iG, input$GENEid)
     
       plot_pathview(gene.data =ScaledData,
                     pathway.id = input$inText,
@@ -640,60 +575,19 @@ server <- function(input, output) { #,session
       incProgress(7 / 10)
       # connect the " lysis" button and active  by clicking .
       output$text = eventReactive(input$click, {
-        # Check if the file exists
-        if (file.exists("FilterData.rds")) {
-          FilterData <- readRDS("FilterData.rds")
-          # Don't remove it here
-        } else {
-          FilterData <- MethodData()
-          # Save the result to the file for later use
-          saveRDS(FilterData, "FilterData.rds")
-        }
+        FilterData <- MethodData()
         
-        iG <- FilterData$ig
-        NewData = FilterData$newdata
-        
-        
-        # Delete the file when the user session ends
-        # observe({
-        #   session$onSessionEnded(function() {
-        #     if (file.exists("FilterData.rds")) {
-        # #      file.remove("FilterData.rds")
-        #     }
-        #   })
-        # })
         
         #Plot the Similarity Graph
         output$graph <- renderVisNetwork({
           text3()
           
           if (input$graph1) {
-            # Check if the file exists
-            if (file.exists("FilterData.rds")) {
-              FilterData <- readRDS("FilterData.rds")
-              # Don't remove it here
-            } else {
-              FilterData <- MethodData()
-              # Save the result to the file for later use
-              saveRDS(FilterData, "FilterData.rds")
-            }
-            
-            iG <- FilterData$ig
-            NewData = FilterData$newdata
-            
-            
-            # Delete the file when the user session ends
-            # observe({
-            #   session$onSessionEnded(function() {
-            #     if (file.exists("FilterData.rds")) {
-            #  #     file.remove("FilterData.rds")
-            #     }
-            #   })
-            # })
+          
             
             isolate({
            
-              GraphsFun(NewData,iG)
+              GraphsFun(FilterData)
             })
             
             
@@ -710,32 +604,8 @@ server <- function(input, output) { #,session
       output$PPInetwork <- renderPlot(execOnResize = FALSE, {
         text3()
         if (input$PPInetwork1) {
-          # Check if the file exists
-          if (file.exists("FilterData.rds")) {
-            FilterData <- readRDS("FilterData.rds")
-            # Don't remove it here
-          } else {
-            FilterData <- MethodData()
-            # Save the result to the file for later use
-            saveRDS(FilterData, "FilterData.rds")
-          }
-          
-          iG <- FilterData$ig
-          NewData = FilterData$newdata
-          
-          
-          # Delete the file when the user session ends
-          # observe({
-          #   session$onSessionEnded(function() {
-          #     if (file.exists("FilterData.rds")) {
-          #  #     file.remove("FilterData.rds")
-          #     }
-          #   })
-          # })
-         
           print("i am here to PPInetwork1")
           isolate({
-           
             PPInetwork(iG)
           })
           
@@ -743,16 +613,7 @@ server <- function(input, output) { #,session
         }
       })
     }
-    
   })
-  
-  onStop(function() {
-    if (file.exists("FilterData.rds")) {
-      file.remove("FilterData.rds")
-    }
-  })
-  # Clean the environment
-  rm(list = ls(), envir = globalenv())
 }
 
 #  Run the app ----
