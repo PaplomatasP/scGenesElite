@@ -62,7 +62,7 @@ ImportanceFilter = function(data,
     )
     print("iam xgbTree")
     
-    model <- caret::train(
+    model <- train(
       Labels ~ .,
       data = data,
       method = "xgbTree",
@@ -77,7 +77,7 @@ ImportanceFilter = function(data,
     tune_grid <- expand.grid(mtry = c(3, 6))
     print("iam rf")
     # Train the model 
-    model <- caret::train(
+    model <- train(
       Labels ~ .,
       data = data,
       method = "rf",

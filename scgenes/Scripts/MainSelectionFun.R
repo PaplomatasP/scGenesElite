@@ -7,13 +7,10 @@ MethodData = function() {
     
     
     if (input$GENEid == "EnsemblGenes") {
-    
       RDS_file <- readRDS(input$rdsFile$datapath)
-      # Convert to title case
-    #  colnames(RDS_file) <- tools::toTitleCase(tolower(colnames(RDS_file)))
-      RDS_file1 <- LexikonFun(RDS_file, input$organismus, input$GENEid)
-  
-       
+
+      RDS_file1 <<- LexikonFun(RDS_file, input$organismus, input$GENEid)
+    
       validate(need(
         ncol(RDS_file1) != 0,
         "The Genes Id or the Organismus is not correct"
@@ -21,11 +18,8 @@ MethodData = function() {
       
     }
     if (input$GENEid == "ENTREZID") {
-    
       RDS_file <- readRDS(input$rdsFile$datapath)
-     # colnames(RDS_file) <- tools::toTitleCase(tolower(colnames(RDS_file)))
-      
-      RDS_file1 <- LexikonFun(RDS_file, input$organismus, input$GENEid)
+      RDS_file1 <<- LexikonFun(RDS_file, input$organismus, input$GENEid)
       validate(need(
         ncol(RDS_file1) != 0,
         "The Genes Id or the Organismus is not correct"
@@ -33,18 +27,16 @@ MethodData = function() {
       
     }
     if (input$GENEid == "SYMBOL") {
-      
       RDS_file <- readRDS(input$rdsFile$datapath)
-    #  colnames(RDS_file) <- tools::toTitleCase(tolower(colnames(RDS_file)))
-      
-      RDS_file1 <- LexikonFun(RDS_file, input$organismus, input$GENEid)
+      RDS_file1 <<- LexikonFun(RDS_file, input$organismus, input$GENEid)
       validate(need(
         ncol(RDS_file1) != 0,
         "The Genes Id or the Organismus is not correct"
       ))
     }
     
-
+    
+    
     withProgress(message = 'Please wait........', value = 0
                  , {
                    {
@@ -77,15 +69,13 @@ MethodData = function() {
                    else if (input$VariableM == "SCMarker" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
                             & input$ensembleWrapper=="NoMethod" & 
                             input$ML_Method=="Empty") {
-                     colnames(RDS_file1) <- tools::toTitleCase(tolower(colnames(RDS_file1)))
                      FilterData <- SCMarkerfun(
                        RDS_file1,
                        Labels = RDS_file1[, ncol(RDS_file1)],
                        GeneSK = input$geneK,
                        CellSK = input$cellK
-                       
                      )
-                    
+                     
                    }
                    
                    else if (input$VariableM == "SelfE" &  input$P_method=="Empty" & input$ensembleVar=="NoMethod" & input$ensemblePvalue=="NoMethod"
@@ -141,15 +131,12 @@ MethodData = function() {
                    }
                    
                    tryCatch({
-                    
-                     iG <- FilterData$ig
                     if (exists("iG")) {
                    output$TheBarPlot <- renderPlot(execOnResize = FALSE,{
                      
                          
                     
                      dfbar = as.data.frame(head(iG, input$genes) ) #input$genes
-                    
                      ColorFun <-
                        colorRampPalette(c("#CCCCCC" , "#104E8B"))
                      ColorPaleta <- ColorFun(n = nrow(x = dfbar))
@@ -231,29 +218,24 @@ MethodData = function() {
                    
                    tryCatch({
                      if (exists("FilterData") ) {
-                       
-                       iG <- FilterData$ig
-                       NewData = FilterData$newdata
-                     
-                       
+                   
                    output$HeatmapList = renderTable({
                      if (input$HeatMap1 == TRUE) {
-                       complexHeatMapFun(NewData,iG,Plot=FALSE)
+                       complexHeatMapFun(FilterData,Plot=FALSE)
                       
                     
                      }
                      
                    })
                    
-                  
                    output$KnnClassifier = renderPlot({
-                     KnnClassifier(data = NewData,iG, Labels = NewData[, ncol(NewData)])
+                     KnnClassifier(data = FilterData, Labels = FilterData[, ncol(FilterData)])
                      
                    })
                    output$HeatMap <-
                      renderPlot(execOnResize = FALSE, {
                        if (input$HeatMap1 == TRUE) {
-                         complexHeatMapFun(NewData,iG,Plot=TRUE)
+                         complexHeatMapFun(FilterData,Plot=TRUE)
                        }
                        
                      })
@@ -275,7 +257,7 @@ MethodData = function() {
                        paste("FilterData-", Sys.Date(), ".csv", sep = "")
                      },
                      content = function(file) {
-                       write.csv(NewData, file)
+                       write.csv(FilterData, file)
                      }
                    )
                    {
@@ -298,8 +280,6 @@ MethodData = function() {
   else {
     if (input$GENEid == "EnsemblGenes") {
       CSV_file <- read.csv(input$file1$datapath)
-     # colnames(CSV_file) <- tools::toTitleCase(tolower(colnames(CSV_file)))
-      
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
       rownames(CSV_file1)=rownames(CSV_file)
       validate(need(
@@ -310,7 +290,6 @@ MethodData = function() {
     }
     if (input$GENEid == "ENTREZID") {
       CSV_file <- read.csv(input$file1$datapath)
-      #colnames(CSV_file) <- tools::toTitleCase(tolower(colnames(CSV_file)))
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
       rownames(CSV_file1)=rownames(CSV_file)
       validate(need(
@@ -321,8 +300,7 @@ MethodData = function() {
     }
     if (input$GENEid == "SYMBOL") {
       CSV_file <- read.csv(input$file1$datapath)
-    #  colnames(CSV_file) <- tools::toTitleCase(tolower(colnames(CSV_file)))
-      CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
+      CSV_file1 <<- LexikonFun(CSV_file, input$organismus, input$GENEid)
       rownames(CSV_file1)=rownames(CSV_file)
       validate(need(
         ncol(CSV_file1) != 0,
@@ -428,7 +406,6 @@ MethodData = function() {
       }
       
       tryCatch({
-        iG <- FilterData$ig
         if (exists("iG")) {
           output$TheBarPlot <- renderPlot({
             
@@ -515,12 +492,10 @@ MethodData = function() {
       
       tryCatch({
         if (exists("FilterData") ) {
-          iG <- FilterData$ig
-          NewData = FilterData$newdata
           
           output$HeatmapList = renderTable({
             if (input$HeatMap1 == TRUE) {
-              complexHeatMapFun(NewData,iG,Plot=FALSE)
+              complexHeatMapFun(FilterData,Plot=FALSE)
               
               
             }
@@ -528,13 +503,13 @@ MethodData = function() {
           })
           
           output$KnnClassifier = renderPlot({
-            KnnClassifier(data = NewData,iG, Labels = NewData[, ncol(NewData)])
+            KnnClassifier(data = FilterData, Labels = FilterData[, ncol(FilterData)])
             
           })
           output$HeatMap <-
             renderPlot(execOnResize = FALSE, {
               if (input$HeatMap1 == TRUE) {
-                complexHeatMapFun(NewData,iG,Plot=TRUE)
+                complexHeatMapFun(FilterData,Plot=TRUE)
                 
               }
             })
@@ -554,7 +529,7 @@ MethodData = function() {
           paste("FilterData-", Sys.Date(), ".csv", sep = "")
         },
         content = function(file) {
-          write.csv(NewData, file)
+          write.csv(FilterData, file)
         }
       )
       {
@@ -586,7 +561,7 @@ MethodData = function() {
   }, error = function(e) {
    
   })
-  saveRDS(FilterData, "FilterData.rds")
+  
   return(FilterData)
   
 }
