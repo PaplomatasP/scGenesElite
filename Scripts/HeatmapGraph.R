@@ -40,7 +40,7 @@ complexHeatMapFun = function(data,iG, Plot=TRUE) {
           data$singlr_labels <- HeatmapLabel
           data = aggregate(data[, 1:length(data[, -ncol(data)])], list(data$singlr_labels), FUN =
                              mean)
-          print(HeatmapLabel)
+          
         }
         
         
@@ -78,7 +78,7 @@ complexHeatMapFun = function(data,iG, Plot=TRUE) {
           data$singlr_labels <- HeatmapLabel
           data = aggregate(data[, 1:length(data[, -ncol(data)])], list(data$singlr_labels), FUN =
                              mean)
-          print(HeatmapLabel)
+         
         }
         
         

@@ -12,6 +12,7 @@ libs <-
     "shinydashboard",
     "twoddpcr",
     "SCMarker",
+    "scran",
     "DT",
     "Seurat",
     "pathview",
@@ -42,6 +43,8 @@ lapply(libs, require, character.only = TRUE)
 
 
 options(repos = BiocManager::repositories())
+options(download.file.method = "libcurl")
+
 
 
 websiteLive <- TRUE
@@ -222,7 +225,7 @@ ui <- #fluidPage(div(class = "tab-content",
             
             choices = c("H.sapiens" = "Human",
                         "M. musculus" = "Mouse"),
-            selected = "Human",
+            selected = "Mouse",
             inline = TRUE
           ),
           
@@ -469,7 +472,7 @@ we utilize the Seurat package for data normalization, a crucial step in single-c
                   label    = "HVGs Methods:",
                   choices = list(
                     "SCMarker"       = "SCMarker",
-                    "DUBStepR"       = "DUBStepR",
+                    "scran"       = "DUBStepR",
                     "ScPNMF"         =  "ScPNMF",
                     "VST"          = "SelfE" ,
                     "M3Drop"          = "M3Drop" ,
@@ -511,99 +514,30 @@ we utilize the Seurat package for data normalization, a crucial step in single-c
                 )
               )),
               
-              column(4,
-                     div(style = "color:black",
-                         "SCMarker:", ), ),
-              column(4,
-                     numericInput(
-                       "geneK",
-                       "geneK",
-                       value = 20,
-                       min = 0,
-                       step = 1
-                     )),
-              column(4,
-                     numericInput(
-                       "cellK",
-                       "cellK",
-                       value = 20,
-                       min = 0,
-                       step = 1
-                     )),
-              
-              column(4,
-                     div(style = "color:black",
-                         "DUBStepR:", ), ),
-              column(4,
-                     numericInput(
-                       "k",
-                       "k",
-                       value = 10,
-                       min = 1,
-                       step = 1
-                     )),
-              
-              column(4,
-                     numericInput(
-                       "np",
-                       "num.pcs",
-                       value = 10,
-                       min = 1,
-                       step = 1
-                     )),
-              column(4,
-                     div(style = "color:black",
-                         "ScPNMF:", ), ),
-              column(4,
-                     numericInput(
-                       "gM",
-                       "M Genes #",
-                       value = 300,
-                       min = 1,
-                       step = 1
-                     )),
-              column(4,
-                     selectInput(
-                       "distMethod",
-                       "distMethod",
-                       c(
-                         "EucDist" = "EucDist",
-                         "KL" = "KL",
-                         "DPNMF" = "DPNMF"
-                       )
-                     )),
-              column(width = 4,
-                     div(style = "color:black",
-                         "M3Drop:", ), ),
-              column(
-                4,
-                numericInput(
-                  "M3dropthreshold",
-                  "mt_threshold",
-                  value = 0.001,
-                  min = 0,
-                  max = 1,
-                  step = 0.01
-                )
+              fluidRow(
+                column(4, div(style = "color:black", "SCMarker:")),
+                column(4, numericInput("geneK", "geneK", value = 20, min = 0, step = 1)),
+                column(4, numericInput("cellK", "cellK", value = 20, min = 0, step = 1))
               ),
-              column(4,
-                     selectInput(
-                       "M3Method", "mt_method",
-                       c("bon" = "bon",
-                         "fdr" = "fdr"
-                         )
-                     )),
-              column(4,
-                     div(style = "color:black",
-                         "VST:", ), ),
-              column(4,
-                     numericInput(
-                       "n",
-                       "# Features",
-                       value = 300,
-                       min = 1,
-                       step = 1
-                     )),
+              fluidRow(
+                column(4, div(style = "color:black", "scran:")),
+                column(8, numericInput("np", "num.Genes", value = 300, min = 1, step = 1))
+              ),
+              fluidRow(
+                column(4, div(style = "color:black", "ScPNMF:")),
+                column(8, numericInput("gM", "M Genes #", value = 300, min = 1, step = 1))
+              ),
+              fluidRow(
+                column(4, div(style = "color:black", "M3Drop:")),
+                column(4, numericInput("M3dropthreshold", "mt_threshold", value = 0.001, min = 0, max = 1, step = 0.01)),
+                column(4, selectInput("M3Method", "mt_method", c("bon" = "bon", "fdr" = "fdr")))
+              ),
+              fluidRow(
+                column(4, div(style = "color:black", "VST:")),
+                column(4, numericInput("n", "# Features", value = 300, min = 1, step = 1)),
+                column(4, selectInput("distMethod", "distMethod", c("EucDist" = "EucDist", "KL" = "KL", "DPNMF" = "DPNMF")))
+              ),
+              
               
             )  ,
             
@@ -755,7 +689,7 @@ we utilize the Seurat package for data normalization, a crucial step in single-c
               label    = "HVGs Methods:",
               choices = list(
                 "SCMarker"       = "SCMarker",
-                "DUBStepR"       = "DUBStepR",
+                "scran"       = "DUBStepR",
                 "ScPNMF"         =  "ScPNMF",
                 "M3Drop"          = "M3Drop" ,
                 "VST"          = "SelfE" ,
