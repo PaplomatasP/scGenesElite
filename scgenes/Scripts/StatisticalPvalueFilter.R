@@ -39,20 +39,27 @@ PvalueCalc = function(data, Pvaluemethod) {
     
     Input <-
       Seurat::CreateSeuratObject(counts = object_Seurat, meta.data = MetaData)
+    Input <-NormalizeData(Input)
+   
+    # Determine the number of levels in Labels
+    num_levels <- length(levels(as.factor(tLabel)))
+    
+    # Create a list of ident values based on the number of levels
+    ident_values <- levels(as.factor(tLabel))[1:num_levels]
+    
+    # Create a list of ident arguments for Seurat::FindMarkers
+    ident_args <- paste0("ident.", 1:num_levels, " = ident_values[", 1:num_levels, "]")
+    
+    # Combine the ident arguments into a single string
+    ident_string <- paste(ident_args, collapse = ", ")
+    
+    # Use the generated ident_string in Seurat::FindMarkers
+    result <- eval(parse(text = paste("Seurat::FindMarkers(object = Input, 
+                                    group.by = 'groups', logfc.threshold = -Inf, 
+                                    test.use = 'wilcox', only.pos = FALSE, verbose = FALSE,
+                                    min.cells.group = 1, ", ident_string, ")")))
     
     
-    result <-
-      Seurat::FindMarkers(
-        object = Input,
-        ident.1 = levels(as.factor(tLabel))[1],
-        ident.2 = levels(as.factor(tLabel))[2],
-        group.by = 'groups',
-        logfc.threshold = -Inf,
-        test.use = "wilcox",
-        only.pos = FALSE,
-        verbose = FALSE,
-        min.cells.group=1
-      )
     results_Seurat <- list(
       gene_names = row.names(result),
       pvalue = result$p_val,
