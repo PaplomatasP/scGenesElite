@@ -1,7 +1,6 @@
 #Load the necessary libraries
-libs <-
-  c(
-    "shiny","shinyalert",
+libs <-c("shiny",
+    "shinyalert",
     "shinythemes",
     "enrichR",
     "ggplot2",
@@ -43,7 +42,7 @@ lapply(libs, require, character.only = TRUE)
 
 
 options(repos = BiocManager::repositories())
-options(download.file.method = "libcurl")
+#options(download.file.method = "libcurl")
 
 
 
