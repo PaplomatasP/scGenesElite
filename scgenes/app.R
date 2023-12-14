@@ -1,10 +1,10 @@
 source("ui.R", local = TRUE)
+
 # Define server logic to read selected file ----
 server <- function(input, output) { #,session
   #  shinyjs::runjs("$('navbarPage > *').css('zoom', '10%');")
   
   tags$head(tags$script(src = "https://code.jquery.com/jquery-3.6.0.min.js"))
-  
   
   # shinyjs::runjs("$(window).off('resize');")
   #loAd all necessary scripts
