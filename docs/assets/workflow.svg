@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="230" viewBox="0 0 1200 230" role="img" aria-labelledby="title desc">
+  <title id="title">The scGenesFinder workflow</title>
+  <desc id="desc">Upload CSV or RDS data, select genes, inspect results, and export plots and tables.</desc>
+  <rect x="1" y="1" width="1198" height="228" rx="18" fill="#f5f8fc" stroke="#dce4ef"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="32" y="38" font-size="12" letter-spacing="2" fill="#53647d">EXPRESSION DATA TO INTERPRETABLE RESULTS</text>
+    <g fill="#fff" stroke="#dce4ef">
+      <rect x="32" y="64" width="258" height="132" rx="12"/>
+      <rect x="324" y="64" width="258" height="132" rx="12"/>
+      <rect x="616" y="64" width="258" height="132" rx="12"/>
+      <rect x="908" y="64" width="258" height="132" rx="12"/>
+    </g>
+    <g fill="none" stroke="#8091a9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M298 130h17m-5-5 5 5-5 5M590 130h17m-5-5 5 5-5 5M882 130h17m-5-5 5 5-5 5"/>
+    </g>
+    <g font-size="12" font-weight="bold" fill="#007b88">
+      <text x="52" y="92">01 / INPUT</text><text x="344" y="92">02 / SELECTION</text>
+      <text x="636" y="92">03 / INTERPRETATION</text><text x="928" y="92">04 / OUTPUT</text>
+    </g>
+    <g font-size="23" font-weight="bold" fill="#142d50">
+      <text x="52" y="127">Upload data</text><text x="344" y="127">Select genes</text>
+      <text x="636" y="127">Inspect results</text><text x="928" y="127">Export findings</text>
+    </g>
+    <g font-size="15" fill="#53647d">
+      <text x="52" y="154">CSV or RDS expression matrix</text><text x="52" y="177">Human or mouse</text>
+      <text x="344" y="154">Individual methods</text><text x="344" y="177">and ensemble rankings</text>
+      <text x="636" y="154">Expression and annotation</text><text x="636" y="177">for the selected gene set</text>
+      <text x="928" y="154">Gene tables and plots</text><text x="928" y="177">300 or 600 dpi bundles</text>
+    </g>
+  </g>
+</svg>

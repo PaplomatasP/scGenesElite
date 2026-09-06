@@ -1,0 +1,29 @@
+name: Bug report
+description: Report an application error or unexpected result.
+title: "[Bug] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include expected behavior and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps and analysis settings
+      description: Include input format, organism, method, parameters and a small reproducing example if available.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Console output
+      render: text
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Paste sessionInfo(), the commit used and your browser version.
+      render: text

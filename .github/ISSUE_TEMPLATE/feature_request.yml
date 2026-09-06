@@ -1,0 +1,18 @@
+name: Feature request
+description: Propose a change for a specific analysis or workflow.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Analysis task
+      description: What are you trying to do, and where does the current workflow fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the desired result and how it could be checked.
+    validations:
+      required: true

@@ -1,69 +1,67 @@
 # scGenesFinder
 
-scGenesFinder is an R Shiny application for gene selection and interpretation of single-cell RNA sequencing data. This repository retains its original GitHub name, **scGenesElite**.
+Gene selection and interpretation for single-cell RNA sequencing data.
 
-The application combines differential expression methods, methods developed for single-cell data, classifier variable importance, SHAP-based selection and ensemble ranking. Selected genes can be inspected through expression plots, k-nearest neighbours classification, Enrichr queries, KEGG maps and interaction graphs.
+[![Application checks](https://github.com/PaplomatasP/scGenesElite/actions/workflows/checks.yml/badge.svg?branch=Master)](https://github.com/PaplomatasP/scGenesElite/actions/workflows/checks.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-0969da.svg)](LICENSE)
 
-## Run locally
+[Get started](#get-started) | [Case study](case-studies/ck-p25/README.md) | [User guide](docs/GETTING_STARTED.md) | [Development](docs/DEVELOPMENT.md)
 
-The canonical application is in `scgenes/`. From the repository root:
+scGenesFinder brings gene selection, expression inspection and functional annotation into an R Shiny application. Upload a labelled expression matrix, compare selection strategies and examine the returned genes through plots and downstream analyses. Human and mouse data are supported.
 
-```sh
-cd scgenes
-Rscript Install_Packages/install_all.R
-Rscript -e 'shiny::runApp(".", host="127.0.0.1", port=3572, launch.browser=TRUE)'
-```
+![Workflow: upload a CSV or RDS expression matrix, select genes, inspect results and export plots and tables](docs/assets/workflow.svg)
 
-In RStudio, set the working directory to `scgenes/` and run `shiny::runApp()` after installing dependencies. GitHub packages may require a compiler toolchain, such as Rtools on Windows. Installation uses CRAN, Bioconductor and the upstream research-package repositories listed in `Install_Packages/`. The case study was run with R 4.6.1 on Windows 11; its exact loaded package versions are recorded separately.
+## From an expression matrix to a gene set
 
-The root-level `app.R`, `ui.R`, `Scripts/`, `data/` and `www/` are synchronized compatibility copies for existing paths. Make application changes under `scgenes/` and run `Rscript tools/sync_app.R` before committing.
-
-## Input and analysis
-
-Upload CSV or RDS data from the sidebar. Use cells as rows, numeric gene-expression columns, and cell labels in the final column. A leading CSV cell-identifier column is recognized as row names. Select the correct organism, human or mouse, and identifier type. The preview displays the uploaded data before analysis.
-
-Choose a selection method and preprocessing settings, then run the analysis. The returned ranking controls the selected gene set used by downstream outputs. Download bundles support 300 or 600 dpi plots. Each run is cached within its Shiny session, and handled selection errors are displayed without closing the session.
-
-The Stop control discards the completed run after R can process the request. It does not interrupt an R computation already in progress. Classification splits cells after gene selection and therefore does not estimate performance on independent biological samples. Enrichment and reference-based annotation require network access.
-
-## CK-p25 microglia case study
-
-The [case-study directory](case-studies/ck-p25/README.md) contains the exact input subset, archived analysis functions, scripts, gene rankings, pathway-test results and publication-size figures.
-
-| Quantity | Recorded result |
+| Stage | What you can do |
 | --- | --- |
-| Source | GSE103334, CK-p25 mouse hippocampal microglia |
-| Input | 384 cells, 2,000 gene columns, four source samples |
-| Annotation | 1,860 mapped genes |
-| SCMarker output | 302 genes, an 83.8% reduction from the mapped input |
-| Week-2 subset | 192 cells, 374 selected genes |
-| Top-50 overlap between runs | 7 genes |
+| Upload | Read CSV or RDS data, check the preview and choose the organism and gene identifiers. |
+| Select | Use differential expression, single-cell methods, classifier importance or SHAP values; combine rankings through ensemble selection. |
+| Inspect | Explore gene scores and expression, classification outputs, enrichment results, KEGG maps and interaction graphs. |
+| Export | Save selected data and plots, including download bundles with 300 or 600 dpi settings. |
 
-![SCMarker ranking and expression across the four CK-p25 source samples](case-studies/ck-p25/figures/scGenesFinder_case_study_600dpi.png)
+## A reproducible example
 
-This figure was prepared from the saved analysis results. It is not a browser screenshot. The heatmap shows gene-wise standardized log2(FPKM + 1) values averaged within each source sample. The separate KEGG audit found no terms with FDR below 0.05. The example documents selection and expression inspection, without establishing independent disease biomarkers or comparative predictive performance.
+The CK-p25 case study uses **384 microglial cells** from four mouse source samples in GSE103334. SCMarker returned **302 genes** from **1,860 mapped inputs**, an **83.8%** reduction. The figure connects the leading 20 scores to expression across the sampled conditions and time points.
 
-## Checks
+[![SCMarker gene ranking and sample-level expression in the CK-p25 microglia example](case-studies/ck-p25/figures/scGenesFinder_case_study_600dpi.png)](case-studies/ck-p25/README.md)
 
-From the repository root, run:
+The heatmap shows mean gene-wise standardized log2(FPKM + 1) expression. It was prepared from the saved analysis results. The example describes a mouse neurodegeneration dataset; it does not establish independently validated disease biomarkers. A separate KEGG audit found no terms with FDR < 0.05.
 
-```sh
-Rscript tools/check_app.R
-Rscript tools/run_tests.R
-Rscript case-studies/ck-p25/verify_results.R
-```
+[Read the analysis and reproduce it](case-studies/ck-p25/README.md) | [Download the input](case-studies/ck-p25/input_ExampleData.csv) | [Vector figure](case-studies/ck-p25/figures/scGenesFinder_case_study.pdf)
 
-The application regression checks require `shiny`, `DT`, `caret`, `ggplot2`, `gridExtra`, `foreach`, `doParallel`, `zip`, `png` and their dependencies. They cover CSV/RDS validation, preview state, cached analysis errors, Run/Stop state, selected-gene classification and download settings. They do not exercise every biological method or external service. GitHub Actions runs these checks on pushes and pull requests.
+## Get started
 
-## Docker
+Clone the repository, then run the installer from the application directory:
 
 ```sh
-docker build -t scgenes .
-docker run --rm -p 8447:3838 scgenes
+git clone https://github.com/PaplomatasP/scGenesElite.git
+cd scGenesElite/scgenes
+Rscript Install_Packages/install_all.R
 ```
 
-The image installs the canonical dependencies and copies `scgenes/` into Shiny Server. A full Docker build is separate from the local regression checks. Publishing this repository does not update a running server.
+From an R session in that directory:
 
-## License and attribution
+```r
+shiny::runApp(".", host = "127.0.0.1", port = 3572, launch.browser = TRUE)
+```
 
-Application code is distributed under the existing [GNU AGPL v3 license](LICENSE). Public study data and annotation resources retain their source attribution and applicable terms. See the [case-study provenance](case-studies/ck-p25/README.md#data-provenance). Historical interface images remain under `images/`; they describe an earlier interface.
+Use cells as rows, numeric gene-expression columns and labels in the final column. The sidebar accepts CSV or RDS files. See the [user guide](docs/GETTING_STARTED.md) for input examples, analysis settings and troubleshooting, or the [Docker instructions](docs/DEVELOPMENT.md#docker) for container setup.
+
+## Documentation and reproducibility
+
+| Resource | Contents |
+| --- | --- |
+| [User guide](docs/GETTING_STARTED.md) | Installation, input format and the analysis workflow |
+| [CK-p25 case study](case-studies/ck-p25/README.md) | Data provenance, recorded parameters, scripts, results and 600 dpi figures |
+| [Development guide](docs/DEVELOPMENT.md) | Source layout, regression checks and Docker setup |
+| [Contributing](CONTRIBUTING.md) | Reporting a problem or proposing a code change |
+| [Change history](CHANGELOG.md) | Application and analysis updates |
+
+GitHub Actions runs six application regression scripts and checks the committed case-study results. The case study also includes an archived function snapshot, package versions and artifact checksums. Classification currently splits cells after gene selection; its metrics require this context when interpreting performance. See [analysis limits](docs/GETTING_STARTED.md#interpreting-results).
+
+## Project and attribution
+
+The application is named scGenesFinder; the repository retains its original name, scGenesElite. Its code is distributed under the [GNU AGPL v3 license](LICENSE). Study data and annotation resources retain their source attribution and applicable terms, documented with the [case study](case-studies/ck-p25/README.md#data-provenance).
+
+When reporting an analysis, record the repository URL and commit, selection settings, source dataset and package versions. [Open an issue](https://github.com/PaplomatasP/scGenesElite/issues/new/choose) for questions or reproducible problems.
