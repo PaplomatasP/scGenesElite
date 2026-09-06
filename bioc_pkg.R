@@ -1,17 +1,2 @@
-InstallBioc=function(){
-
-
-  BiocManagerPackages=c("M3Drop","ComplexHeatmap","pathview","ensembldb","celldex","org.Mm.eg.db",
-                        "AnnotationFilter","AnnotationDbi","twoddpcr","EnsDb.Mmusculus.v79","EnsDb.Hsapiens.v79",
-                        "Biobase","BiocFileCache","BiocGenerics","BiocParallel","BiocStyle",
-                        "SingleR","STRINGdb","MAST" ,"scran","DESeq2")
-
-
-  for ( Biopackage in BiocManagerPackages){
-    BiocManager::install(Biopackage)
-  }
-}
-
-InstallBioc()
-
-
+# Compatibility entry point. Canonical installers live with the application.
+source("scgenes/Install_Packages/bioc_pkg.R")

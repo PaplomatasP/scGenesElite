@@ -1,0 +1,6 @@
+Source matrix 23951 genes 2208 cells
+Matched genes 2000
+Matched cells 384
+Compared values 768000
+Exactly equal values 767806
+Max absolute difference 9.91999999999997e-18

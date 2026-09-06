@@ -4,6 +4,15 @@
 #using the borda voting method for ensemble purpose.
 EnsemleMethod = function(obj, EnseLabels) {
   GenesList = list()
+  ensemble_shap <- input$ensembleSHAP
+  ensemble_wrapper <- input$ensembleWrapper
+  shap_importance_limit <- input$SHAP_importanceLimit
+  if (is.null(shap_importance_limit)) {
+    shap_importance_limit <- input$importanceLimit
+  }
+  if (is.null(shap_importance_limit)) {
+    shap_importance_limit <- 0.01
+  }
   ####Variable METHODS
  
   if (input$ensembleVar == "SCMarker") {
@@ -72,11 +81,12 @@ EnsemleMethod = function(obj, EnseLabels) {
     DATA6 <- DATA6$newdata
     GenesList = append(GenesList, list(DATA6 = colnames(DATA6)[-ncol(DATA6)]))
   }
-  if (input$ensemblePvalue == "monocle_method") {
+  if (input$ensemblePvalue == "DESeq2_method") {
     DATA7 <- SelectionFilter(
        obj,
-      Labels = EnseLabels,
-      PvalueNum = input$PvalueNum
+       Labels = EnseLabels,
+       PvalueNum = input$PvalueNum,
+       logfc = input$logfc
     )
     DATA7 <- DATA7$newdata
     GenesList = append(GenesList, list(DATA7 = colnames(DATA7)[-ncol(DATA7)]))
@@ -103,6 +113,64 @@ EnsemleMethod = function(obj, EnseLabels) {
     )
     DATA9 <- DATA9$newdata
     GenesList = append(GenesList, list(DATA9 = colnames(DATA9)[-ncol(DATA9)]))
+  }
+  
+  ####SHAP METHODS (Separate category)
+  if (!is.null(ensemble_shap) && ensemble_shap != "NoMethod") {
+    if (ensemble_shap == "shap_rf") {
+      DATA10 <- ShapValuesFilter(
+        data = obj,
+        Labels = EnseLabels,
+        MLmethod = "rf",
+        importanceLimit = shap_importance_limit
+      )
+      if (is.list(DATA10) && !is.null(DATA10$newdata)) {
+        DATA10 <- DATA10$newdata
+        GenesList = append(GenesList, list(DATA10 = colnames(DATA10)[-ncol(DATA10)]))
+      }
+    }
+    
+    if (ensemble_shap == "shap_xgb") {
+      DATA11 <- ShapValuesFilter(
+        data = obj,
+        Labels = EnseLabels,
+        MLmethod = "xgbTree",
+        importanceLimit = shap_importance_limit
+      )
+      if (is.list(DATA11) && !is.null(DATA11$newdata)) {
+        DATA11 <- DATA11$newdata
+        GenesList = append(GenesList, list(DATA11 = colnames(DATA11)[-ncol(DATA11)]))
+      }
+    }
+  }
+  
+  # Legacy support: check ensembleWrapper for SHAP (backward compatibility)
+  if (!is.null(ensemble_wrapper)) {
+    if (ensemble_wrapper == "shap_rf" && (is.null(ensemble_shap) || ensemble_shap == "NoMethod")) {
+      DATA10 <- ShapValuesFilter(
+        data = obj,
+        Labels = EnseLabels,
+        MLmethod = "rf",
+        importanceLimit = shap_importance_limit
+      )
+      if (is.list(DATA10) && !is.null(DATA10$newdata)) {
+        DATA10 <- DATA10$newdata
+        GenesList = append(GenesList, list(DATA10 = colnames(DATA10)[-ncol(DATA10)]))
+      }
+    }
+    
+    if (ensemble_wrapper == "shap_xgb" && (is.null(ensemble_shap) || ensemble_shap == "NoMethod")) {
+      DATA11 <- ShapValuesFilter(
+        data = obj,
+        Labels = EnseLabels,
+        MLmethod = "xgbTree",
+        importanceLimit = shap_importance_limit
+      )
+      if (is.list(DATA11) && !is.null(DATA11$newdata)) {
+        DATA11 <- DATA11$newdata
+        GenesList = append(GenesList, list(DATA11 = colnames(DATA11)[-ncol(DATA11)]))
+      }
+    }
   }
   
   # if (input$ensembleMLBased %in% MLlist) {
@@ -160,7 +228,6 @@ EnsemleMethod = function(obj, EnseLabels) {
                  text = "No method has been selected! Multiple methods must be selected in order to use the Ensemble method", closeOnClickOutside = TRUE) 
    
       
+      return(NULL)
     }
-  EnsembledData=EnsembledData
-  return(EnsembledData)
 }

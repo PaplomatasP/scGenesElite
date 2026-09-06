@@ -1,12 +1,2 @@
-InstallCran=function(){
-  
-  CranPackages=c("shinythemes","caret","enrichR",
-                 "gridExtra","shinyWidgets","shinydashboard","Seurat",
-                 "visNetwork","grid","png","DT","shinyjs", "votesys",
-                 "shinycustomloader","igraph", "BiocManager", "shinyalert", "randomForest", "xgboost", "C50", "Matrix", "glmnet")
-
-install.packages(CranPackages)
-
-}
-
-InstallCran()
+# Compatibility entry point. Canonical installers live with the application.
+source("scgenes/Install_Packages/cran_pkg.R")

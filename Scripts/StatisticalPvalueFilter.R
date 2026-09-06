@@ -75,6 +75,27 @@ PvalueCalc = function(data, Pvaluemethod) {
   
   
   else if (Pvaluemethod == "BPSC_metchod") {
+    # GC Petros S 1: Register parallel backend for BPSC
+    cl <- NULL
+    was_registered <- FALSE
+    if (requireNamespace("foreach", quietly = TRUE) && 
+        requireNamespace("doParallel", quietly = TRUE)) {
+      was_registered <- foreach::getDoParRegistered()
+      if (!was_registered) {
+        cores <- parallel::detectCores()
+        cl <- parallel::makeCluster(min(max(cores - 1, 1), 4))
+        doParallel::registerDoParallel(cl)
+        # Tear down on every exit path. If BPglm fails we would otherwise leave
+        # foreach pointing at this cluster; caret::train then picks %dopar%,
+        # dispatches to a dead worker and dies with "task 1 failed".
+        on.exit({
+          doParallel::stopImplicitCluster()
+          try(parallel::stopCluster(cl), silent = TRUE)
+          foreach::registerDoSEQ()
+        }, add = TRUE)
+      }
+    }
+    
     object_BPSC <-
       as.matrix(SummarizedExperiment::assay(data, "normcounts"))
     
@@ -90,6 +111,14 @@ PvalueCalc = function(data, Pvaluemethod) {
     logFC_values <- log2(DiffMEan[, 2] / DiffMEan[, 1])
     
     design <- model.matrix( ~ data$label)
+    
+    # GC Petros S 2: Suppress convergence warnings and handle gracefully
+    old_warn <- options(warn = -1)$warn
+    use_parallel <- if (requireNamespace("foreach", quietly = TRUE)) {
+      foreach::getDoParRegistered()
+    } else {
+      FALSE
+    }
     resbp <-
       BPSC::BPglm(
         data = object_BPSC,
@@ -97,8 +126,13 @@ PvalueCalc = function(data, Pvaluemethod) {
         design = design,
         coef = 2,
         estIntPar = TRUE,
-        useParallel = TRUE
+        useParallel = use_parallel
       )
+    options(warn = old_warn)
+    
+    # GC Petros S 3: the cluster is released by the on.exit handler registered
+    # next to makeCluster, so it happens on error paths too.
+    
     FDR <- p.adjust(resbp$PVAL, method = "BH")
     result_BPSC <-
       list(
@@ -240,7 +274,7 @@ StatisticalPvalueFilter = function(data, Labels, threshold,logfc) {
     ))
     }
   }
-  if (input$P_method == "DESeq2_method") {
+  if (PvalueMethod == "DESeq2_method") {
     print("DESeq2_method")
     count = 0
     PvalueTreshold = list()

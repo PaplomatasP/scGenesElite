@@ -85,6 +85,14 @@ PvalueCalc = function(data, Pvaluemethod) {
         cores <- parallel::detectCores()
         cl <- parallel::makeCluster(min(max(cores - 1, 1), 4))
         doParallel::registerDoParallel(cl)
+        # Tear down on every exit path. If BPglm fails we would otherwise leave
+        # foreach pointing at this cluster; caret::train then picks %dopar%,
+        # dispatches to a dead worker and dies with "task 1 failed".
+        on.exit({
+          doParallel::stopImplicitCluster()
+          try(parallel::stopCluster(cl), silent = TRUE)
+          foreach::registerDoSEQ()
+        }, add = TRUE)
       }
     }
     
@@ -122,11 +130,8 @@ PvalueCalc = function(data, Pvaluemethod) {
       )
     options(warn = old_warn)
     
-    # GC Petros S 3: Clean up parallel cluster only if we created it
-    if (!is.null(cl) && !was_registered) {
-      doParallel::stopImplicitCluster()
-      parallel::stopCluster(cl)
-    }
+    # GC Petros S 3: the cluster is released by the on.exit handler registered
+    # next to makeCluster, so it happens on error paths too.
     
     FDR <- p.adjust(resbp$PVAL, method = "BH")
     result_BPSC <-
@@ -269,7 +274,7 @@ StatisticalPvalueFilter = function(data, Labels, threshold,logfc) {
     ))
     }
   }
-  if (input$P_method == "DESeq2_method") {
+  if (PvalueMethod == "DESeq2_method") {
     print("DESeq2_method")
     count = 0
     PvalueTreshold = list()

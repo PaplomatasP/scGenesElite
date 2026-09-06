@@ -2,3 +2,14 @@
 .Rhistory
 .RData
 .Ruserdata
+*.Rproj.user/
+Rplots.pdf
+FilterData.rds
+case-studies/ck-p25/cache/
+case-studies/ck-p25/figures/figure_layout.pdf
+tmp/
+output/
+*.log
+.env
+.env.*
+!.env.example

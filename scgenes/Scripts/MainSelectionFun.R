@@ -1,14 +1,21 @@
 #Here is the main function that performs the feature selection method and visualizes the isolated genes.
 
 MethodData = function() {
+  has_csv <- !is.null(input$file1) && length(input$file1) > 0L
+  has_rds <- !is.null(input$rdsFile) && length(input$rdsFile) > 0L
+  validate(need(
+    xor(has_csv, has_rds),
+    "Upload exactly one dataset: either CSV or RDS, but not both."
+  ))
+
   #check if the input data are rds. and do the all process ........
-  if (length(input$file1) == 0) {
+  if (!has_csv) {
+    RDS_file <- read_uploaded_rds(input$rdsFile)
 
     
     
     if (input$GENEid == "EnsemblGenes") {
     
-      RDS_file <- readRDS(input$rdsFile$datapath)
       # Convert to title case
     #  colnames(RDS_file) <- tools::toTitleCase(tolower(colnames(RDS_file)))
       RDS_file1 <- LexikonFun(RDS_file, input$organismus, input$GENEid)
@@ -22,7 +29,6 @@ MethodData = function() {
     }
     if (input$GENEid == "ENTREZID") {
     
-      RDS_file <- readRDS(input$rdsFile$datapath)
      # colnames(RDS_file) <- tools::toTitleCase(tolower(colnames(RDS_file)))
       
       RDS_file1 <- LexikonFun(RDS_file, input$organismus, input$GENEid)
@@ -34,7 +40,6 @@ MethodData = function() {
     }
     if (input$GENEid == "SYMBOL") {
       
-      RDS_file <- readRDS(input$rdsFile$datapath)
     #  colnames(RDS_file) <- tools::toTitleCase(tolower(colnames(RDS_file)))
       
       RDS_file1 <- LexikonFun(RDS_file, input$organismus, input$GENEid)
@@ -222,51 +227,43 @@ MethodData = function() {
                     iG <- FilterData$ig
                     newdata <- FilterData$newdata
                     if (exists("iG")) {
-                   output$TheBarPlot <- renderPlot(execOnResize = FALSE,{
-                     
-                         
-                    
-                     dfbar = as.data.frame(head(iG, input$genes) ) #input$genes
-                    
-                     ColorFun <-
-                       colorRampPalette(c("#CCCCCC" , "#104E8B"))
-                     ColorPaleta <- ColorFun(n = nrow(x = dfbar))
-                     
-                     dfbar$Color <-
-                       as.character(x = cut(
-                         x = rank(x = dfbar[, 1])  # used to assign order in the event of ties
-                         ,
-                         breaks = nrow(x = dfbar)  # same as the 'n' supplied in ColorFun
-                         ,
-                         labels = ColorPaleta  # label the groups with the color in ColorPaleta
-                       ))
-                   
-                     
-                     par(mar = c(7, 4.2, 4.1, 3))
-                     barplot(
-                       height = dfbar[, 1],
-                       names.arg = rownames(dfbar),
-                       las = 2,
-                       col = dfbar$Color,
-                       border = NA,
-                       main = "Most Important Genes which Act as Potential Biomarkers for the given case-study",
-                       cex.main = 1.2,
-                       #xlab = "Genes ID",
-                       cex.names = 0.5
+                   output$TheBarPlot <- renderGirafe({
+                     dfbar <- as.data.frame(head(iG, input$genes))
+                     dfbar$gene <- factor(rownames(dfbar), levels = rev(rownames(dfbar)))
+                     colnames(dfbar)[1] <- "score"
+
+                     p <- ggplot2::ggplot(dfbar, ggplot2::aes(x = gene, y = score)) +
+                       ggiraph::geom_bar_interactive(
+                         ggplot2::aes(
+                           tooltip = paste0("<b>", gene, "</b><br>Score: ", round(score, 4)),
+                           data_id = gene,
+                           fill = score
+                         ),
+                         stat = "identity", width = 0.7
+                       ) +
+                       ggplot2::coord_flip() +
+                       ggplot2::scale_fill_gradient(low = "#cbd5e1", high = "#1e40af", guide = "none") +
+                       ggplot2::theme_minimal(base_size = 13) +
+                       ggplot2::theme(
+                         axis.text.y = ggplot2::element_text(size = 10, color = "#1e293b"),
+                         axis.text.x = ggplot2::element_text(size = 10),
+                         panel.grid.major.y = ggplot2::element_blank(),
+                         panel.grid.minor = ggplot2::element_blank(),
+                         plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5)
+                       ) +
+                       ggplot2::labs(x = NULL, y = "Importance Score",
+                            title = "Potential Biomarker Genes")
+
+                     ggiraph::girafe(
+                       ggobj = p,
+                       width_svg = 10,
+                       height_svg = max(5, nrow(dfbar) * 0.22),
+                       options = list(
+                         ggiraph::opts_hover(css = "fill:#3b82f6;stroke:#1e40af;cursor:pointer;"),
+                         ggiraph::opts_tooltip(css = "background:rgba(15,23,42,0.95);color:white;padding:8px 12px;border-radius:8px;font-size:13px;"),
+                         ggiraph::opts_toolbar(saveaspng = TRUE)
+                       )
                      )
-                     mtext(
-                       "Genes ID",
-                       side = 1,
-                       line = 3,
-                       cex = 1.2,
-                       font = 2,
-                       col = "black",
-                       family = "Calibri Light",
-                       padj = 1.5
-                     )
-                     
-                     
-                     
                    }) }else {
                      showModal(modalDialog(
                        title = "Error",
@@ -277,33 +274,33 @@ MethodData = function() {
                      
                    }
                    }, error = function(e) {
-                     print("")
+                     showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
                    })
                    
                    tryCatch({
                      if  (exists("iG") ) {
                        
-                   output$GenesList = renderTable({
+                   output$GenesList = DT::renderDataTable({
                      s1 = lapply(input$genes,
                                  function(i)
                                    iG[1:i,])
                      s1 = as.data.frame(s1)
                      rownames(s1) = make.names(row.names(iG)[1:nrow(s1)], unique = TRUE)
-                     
-                     
+
                      colnames(s1) = paste("# of Genes which operate as Biomarkers: ", nrow(iG))
                      s1[, 1] = rownames(s1)
-                     
-                     s1
-                   }
-                   , rownames = FALSE)} else {
+
+                     DT::datatable(s1, rownames = FALSE,
+                       options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
+                       class = 'cell-border stripe')
+                   })} else {
                      showModal(modalDialog(
                        title = "Message",
                        "The analysis could not be executed; something is wrong with your selection. Make sure that the data you uploaded is in the correct format and that only one methoth from the Gene Selection field is selected; only in the Ensemble Aproach tab more can be select."
                      ))
                    }
                    }, error = function(e) {
-                     print("")
+                     showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
                    })
                    
                    
@@ -314,13 +311,13 @@ MethodData = function() {
                        NewData = FilterData$newdata
                      
                        
-                   output$HeatmapList = renderTable({
+                   output$HeatmapList = DT::renderDataTable({
                      if (input$HeatMap1 == TRUE) {
-                       complexHeatMapFun(NewData,iG,Plot=FALSE)
-                      
-                    
+                       S <- complexHeatMapFun(NewData,iG,Plot=FALSE)
+                       DT::datatable(S, rownames = FALSE,
+                         options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
+                         class = 'cell-border stripe')
                      }
-                     
                    })
                    
                   
@@ -335,7 +332,7 @@ MethodData = function() {
                        }
                        
                      })
-                   
+
                    }else {
                        showModal(modalDialog(
                          title = "Message",
@@ -343,18 +340,53 @@ MethodData = function() {
                        ))
                      }
                    }, error = function(e) {
-                     print("")
+                     showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
                    })
                    
                    
                    
                    output$downloadData <- downloadHandler(
                      filename = function() {
-                       paste("FilterData-", Sys.Date(), ".csv", sep = "")
+                       paste0("scGenesFinder-results-", Sys.Date(), ".zip")
                      },
                      content = function(file) {
-                       write.csv(NewData, file)
-                     }
+                       dpi <- suppressWarnings(as.numeric(input$downloadDpi))
+                       if (is.na(dpi) || !dpi %in% c(300, 600)) dpi <- 300
+
+                       export_dir <- tempfile("scgenes-download-")
+                       dir.create(export_dir)
+                       on.exit(unlink(export_dir, recursive = TRUE, force = TRUE), add = TRUE)
+
+                       # One PNG device per plot, closed immediately after that plot - so an
+                       # error in one plot cannot leave a device open or corrupt another's file.
+                       render_png <- function(png_name, draw) {
+                         path <- file.path(export_dir, png_name)
+                         grDevices::png(path, width = 11, height = 7, units = "in", res = dpi)
+                         tryCatch({
+                           draw()
+                           TRUE
+                         }, error = function(e) {
+                           showNotification(paste0(png_name, " was skipped: ", conditionMessage(e)), type = "warning")
+                           FALSE
+                         }, finally = grDevices::dev.off())
+                       }
+
+                       parts <- "FilterData.csv"
+                       write.csv(NewData, file.path(export_dir, "FilterData.csv"))
+
+                       if (isTRUE(input$HeatMap1) &&
+                           render_png("ExpressionHeatmap.png", function() complexHeatMapFun(NewData, iG, Plot = TRUE))) {
+                         parts <- c(parts, "ExpressionHeatmap.png")
+                       }
+
+                       if (render_png("KnnClassification.png",
+                                      function() KnnClassifier(data = NewData, iG, Labels = NewData[, ncol(NewData)]))) {
+                         parts <- c(parts, "KnnClassification.png")
+                       }
+
+                       zip::zip(file, files = parts, root = export_dir)
+                     },
+                     contentType = "application/zip"
                    )
                    {
                      incProgress(10 / 10)
@@ -374,8 +406,13 @@ MethodData = function() {
     
   }
   else {
+    CSV_file <- read_uploaded_csv(
+      input$file1,
+      header = if (is.null(input$header)) TRUE else as.logical(input$header),
+      sep = if (is.null(input$sep)) "," else input$sep,
+      quote = if (is.null(input$quote)) "\"" else input$quote
+    )
     if (input$GENEid == "EnsemblGenes") {
-      CSV_file <- read.csv(input$file1$datapath)
      # colnames(CSV_file) <- tools::toTitleCase(tolower(colnames(CSV_file)))
       
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
@@ -387,7 +424,6 @@ MethodData = function() {
       
     }
     if (input$GENEid == "ENTREZID") {
-      CSV_file <- read.csv(input$file1$datapath)
       #colnames(CSV_file) <- tools::toTitleCase(tolower(colnames(CSV_file)))
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
       rownames(CSV_file1)=rownames(CSV_file)
@@ -398,7 +434,6 @@ MethodData = function() {
       
     }
     if (input$GENEid == "SYMBOL") {
-      CSV_file <- read.csv(input$file1$datapath)
     #  colnames(CSV_file) <- tools::toTitleCase(tolower(colnames(CSV_file)))
       CSV_file1 <- LexikonFun(CSV_file, input$organismus, input$GENEid)
       rownames(CSV_file1)=rownames(CSV_file)
@@ -580,49 +615,43 @@ MethodData = function() {
         iG <- FilterData$ig
         newdata <- FilterData$newdata
         if (exists("iG")) {
-          output$TheBarPlot <- renderPlot({
-            
-            
-            
-            dfbar = as.data.frame(head(iG, input$genes) )
-            ColorFun <-
-              colorRampPalette(c("#CCCCCC" , "#104E8B"))
-            ColorPaleta <- ColorFun(n = nrow(x = dfbar))
-            
-            dfbar$Color <-
-              as.character(x = cut(
-                x = rank(x = dfbar[, 1])  # used to assign order in the event of ties
-                ,
-                breaks = nrow(x = dfbar)  # same as the 'n' supplied in ColorFun
-                ,
-                labels = ColorPaleta  # label the groups with the color in ColorPaleta
-              ))
-            
-            par(mar = c(7, 4.2, 4.1, 3))
-            barplot(
-              height = dfbar[, 1],
-              names.arg = rownames(dfbar),
-              las = 2,
-              col = dfbar$Color,
-              border = NA,
-              main = "Most Important Genes which Act as Potential Biomarkers for the given case-study",
-              cex.main = 1.2,
-              #xlab = "Genes ID",
-              cex.names = 0.5
+          output$TheBarPlot <- renderGirafe({
+            dfbar <- as.data.frame(head(iG, input$genes))
+            dfbar$gene <- factor(rownames(dfbar), levels = rev(rownames(dfbar)))
+            colnames(dfbar)[1] <- "score"
+
+            p <- ggplot2::ggplot(dfbar, ggplot2::aes(x = gene, y = score)) +
+              ggiraph::geom_bar_interactive(
+                ggplot2::aes(
+                  tooltip = paste0("<b>", gene, "</b><br>Score: ", round(score, 4)),
+                  data_id = gene,
+                  fill = score
+                ),
+                stat = "identity", width = 0.7
+              ) +
+              ggplot2::coord_flip() +
+              ggplot2::scale_fill_gradient(low = "#cbd5e1", high = "#1e40af", guide = "none") +
+              ggplot2::theme_minimal(base_size = 13) +
+              ggplot2::theme(
+                axis.text.y = ggplot2::element_text(size = 10, color = "#1e293b"),
+                axis.text.x = ggplot2::element_text(size = 10),
+                panel.grid.major.y = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5)
+              ) +
+              ggplot2::labs(x = NULL, y = "Importance Score",
+                   title = "Potential Biomarker Genes")
+
+            ggiraph::girafe(
+              ggobj = p,
+              width_svg = 10,
+              height_svg = max(5, nrow(dfbar) * 0.22),
+              options = list(
+                ggiraph::opts_hover(css = "fill:#3b82f6;stroke:#1e40af;cursor:pointer;"),
+                ggiraph::opts_tooltip(css = "background:rgba(15,23,42,0.95);color:white;padding:8px 12px;border-radius:8px;font-size:13px;"),
+                ggiraph::opts_toolbar(saveaspng = TRUE)
+              )
             )
-            mtext(
-              "Genes ID",
-              side = 1,
-              line = 3,
-              cex = 1.2,
-              font = 2,
-              col = "black",
-              family = "Calibri Light",
-              padj = 1.5
-            )
-            
-            
-            
           }) }else {
             showModal(modalDialog(
               title = "Error",
@@ -633,33 +662,33 @@ MethodData = function() {
             
           }
       }, error = function(e) {
-        print("")
+        showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
       })
       
       tryCatch({
         if  (exists("iG") ) {
           
-          output$GenesList = renderTable({
+          output$GenesList = DT::renderDataTable({
             s1 = lapply(input$genes,
                         function(i)
                           iG[1:i,])
             s1 = as.data.frame(s1)
             rownames(s1) = make.names(row.names(iG)[1:nrow(s1)], unique = TRUE)
-            
-            
+
             colnames(s1) = paste("# of Genes which operate as Biomarkers: ", nrow(iG))
             s1[, 1] = rownames(s1)
-            
-            s1
-          }
-          , rownames = FALSE)} else {
+
+            DT::datatable(s1, rownames = FALSE,
+              options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
+              class = 'cell-border stripe')
+          })} else {
             showModal(modalDialog(
               title = "Message",
               "The analysis could not be executed; something is wrong with your selection. Make sure that the data you uploaded is in the correct format and that only one methoth from the Gene Selection field is selected; only in the Ensemble Aproach tab more can be select."
             ))
           }
       }, error = function(e) {
-        print("sdsd")
+        showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
       })
       
       
@@ -668,13 +697,13 @@ MethodData = function() {
           iG <- FilterData$ig
           NewData = FilterData$newdata
           
-          output$HeatmapList = renderTable({
+          output$HeatmapList = DT::renderDataTable({
             if (input$HeatMap1 == TRUE) {
-              complexHeatMapFun(NewData,iG,Plot=FALSE)
-              
-              
+              S <- complexHeatMapFun(NewData,iG,Plot=FALSE)
+              DT::datatable(S, rownames = FALSE,
+                options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
+                class = 'cell-border stripe')
             }
-            
           })
           
           output$KnnClassifier = renderPlot({
@@ -688,7 +717,7 @@ MethodData = function() {
                 
               }
             })
-          
+
         }else {
           showModal(modalDialog(
             title = "Message",
@@ -696,16 +725,51 @@ MethodData = function() {
           ))
         }
       }, error = function(e) {
-        print("")
+        showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
       })
       
       output$downloadData <- downloadHandler(
         filename = function() {
-          paste("FilterData-", Sys.Date(), ".csv", sep = "")
+          paste0("scGenesFinder-results-", Sys.Date(), ".zip")
         },
         content = function(file) {
-          write.csv(NewData, file)
-        }
+          dpi <- suppressWarnings(as.numeric(input$downloadDpi))
+          if (is.na(dpi) || !dpi %in% c(300, 600)) dpi <- 300
+
+          export_dir <- tempfile("scgenes-download-")
+          dir.create(export_dir)
+          on.exit(unlink(export_dir, recursive = TRUE, force = TRUE), add = TRUE)
+
+          # One PNG device per plot, closed immediately after that plot - so an
+          # error in one plot cannot leave a device open or corrupt another's file.
+          render_png <- function(png_name, draw) {
+            path <- file.path(export_dir, png_name)
+            grDevices::png(path, width = 11, height = 7, units = "in", res = dpi)
+            tryCatch({
+              draw()
+              TRUE
+            }, error = function(e) {
+              showNotification(paste0(png_name, " was skipped: ", conditionMessage(e)), type = "warning")
+              FALSE
+            }, finally = grDevices::dev.off())
+          }
+
+          parts <- "FilterData.csv"
+          write.csv(NewData, file.path(export_dir, "FilterData.csv"))
+
+          if (isTRUE(input$HeatMap1) &&
+              render_png("ExpressionHeatmap.png", function() complexHeatMapFun(NewData, iG, Plot = TRUE))) {
+            parts <- c(parts, "ExpressionHeatmap.png")
+          }
+
+          if (render_png("KnnClassification.png",
+                         function() KnnClassifier(data = NewData, iG, Labels = NewData[, ncol(NewData)]))) {
+            parts <- c(parts, "KnnClassification.png")
+          }
+
+          zip::zip(file, files = parts, root = export_dir)
+        },
+        contentType = "application/zip"
       )
       {
         incProgress(10 / 10)
@@ -736,7 +800,6 @@ MethodData = function() {
   }, error = function(e) {
    
   })
-  saveRDS(FilterData, "FilterData.rds")
   return(FilterData)
   
 }

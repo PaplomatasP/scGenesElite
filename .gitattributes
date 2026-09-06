@@ -1,0 +1,12 @@
+* text=auto
+*.R text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.rds binary
+*.png binary
+*.jpg binary
+*.pdf binary
+*.tiff binary
+# Preserve exact distributed artifact bytes for the case-study checksums.
+case-studies/ck-p25/** -text

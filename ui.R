@@ -1,55 +1,59 @@
+# Shared upload limits and validation helpers.
+source("./Scripts/InputValidation.R", local = TRUE)
+
 #Load the necessary libraries
-libs <-
-  c(
-    "shiny","shinyalert",
-    "shinythemes",
-    "enrichR",
-    "ggplot2",
-    "gridExtra",
-    "glue",
-    "tidyverse",
-    "shinyWidgets",
-    "shinydashboard",
-    "twoddpcr",
-    "SCMarker",
-    "scran",
-    "DT",
-    "Seurat",
-    "pathview",
-    "grid",
-    "png",
-    "ggiraph",
-    "AnnotationDbi",
-    "AnnotationFilter",
-    "Biobase",
-    "BiocFileCache",
-    "BiocGenerics",
-    "BiocParallel",
-    "BiocStyle",
-    "BiocManager",
-    "fastAdaboost",
-    "votesys",
-    "shinycustomloader",
-    "M3Drop",
-    "ComplexHeatmap",
-    "igraph",
-    "visNetwork",
-    "SingleR",
-    "shinyjs",
-    "STRINGdb"
-  )
+libs <-c("shiny",
+         "shinyalert",
+         "shinythemes",
+         "enrichR",
+         "ggplot2",
+         "gridExtra",
+         "glue",
+         "tidyverse",
+         "shinyWidgets",
+         "shinydashboard",
+         "twoddpcr",
+         "SCMarker",
+         "scran",
+         "DT",
+         "Seurat",
+         "pathview",
+         "grid",
+         "png",
+         "ggiraph",
+         "AnnotationDbi",
+         "AnnotationFilter",
+         "Biobase",
+         "BiocFileCache",
+         "BiocGenerics",
+         "BiocParallel",
+         "BiocStyle",
+         "BiocManager",
+         "fastAdaboost",
+         "votesys",
+         "M3Drop",
+         "ComplexHeatmap",
+         "igraph",
+         "visNetwork",
+         "SingleR",
+         "shinyjs",
+         "STRINGdb",
+         "fastshap",
+         "xgboost",
+         "randomForest"
+)
 lapply(libs, require, character.only = TRUE)
 
 
 
 options(repos = BiocManager::repositories())
-options(download.file.method = "libcurl")
+#options(download.file.method = "libcurl")
 
 
 
 websiteLive <- TRUE
 #Increase the size of the acceptable import dataset
-options(shiny.maxRequestSize = 256 * 2048 ^ 2)
+options(shiny.maxRequestSize = SCGENES_MAX_UPLOAD_BYTES)
 
 
 
@@ -57,1075 +61,1047 @@ options(shiny.maxRequestSize = 256 * 2048 ^ 2)
 
 # Define UI for data upload app ----
 
-ui <- #fluidPage(div(class = "tab-content",
-  navbarPage(
-  
-    theme = shinythemes::shinytheme("cosmo"),
-    "",
-    tags$head(
-      tags$style(
-        "
-        h1 {
-          text-align: center;
-          font-size: 28px;
-          font-weight: bold;
-        }
-        p {
-          font-family: system-ui;
-          font-size: 15px;
-        }
-        
-         h3 {
-          font-family: system-ui;
-          text-align: center;
-          font-size: 22px;
-          font-weight: bold;
-         }
-        
-         .footer {
-          background-color: #333;
-          color: #fff;
-          text-align: center;
-          padding: 18px;
-         }
-        "
-        # .main-panel {
-        #  padding: 50px;
-        #  background-color: #f2f2f2;
-        #      
-        # }
-        # .header {
-        #   background-color: #333;
-        #   color: #fff;
-        #   text-align: center;
-        #   padding: 19px;
-        # }
-        # 
-        # }
-        # .sidebar-layout {
-        #   padding: 20px;
-        # }
-        # .overview-image {
-        #   display: block;
-        #   margin: 0 auto;
-        # }
-        
-   
-      )
-    ),
-    # App title ----
-    tabPanel (
-     
-      
-        title = tags$img(src='scGenesElite.jpg.png', width = '180px', height = '75px'),
-    
-      
-      sidebarLayout(
-        position = "right",
-        #sidebarPanel(
-     
-        div(tags$img(
-          src = "overview.jpg",
-          width = '520px',
-           height = '600px'
-        ), style = "position:relative; top:0px;"),
-        mainPanel(
-          br(),
-          br(),
-          strong(
-            h1(
-              "A web platform that facilitates the identification of leading genes from scRNA-seq data."
-            )
-          ),
-      
-          tags$hr(),
-          br(),
-          br(),
+ui <- navbarPage(
+  tags$img(
+    src = "scGenesElite.png",
+    class = "brand-mark",
+    alt = "scGeneFinder"
+  ),
+  id = "main_nav",
+  theme = shinythemes::shinytheme("flatly"),
+  windowTitle = "scGeneFinder - Single-Cell Gene Analysis Platform",
+  collapsible = TRUE,
+  header = tags$head(
+    tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
+    tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"),
+    tags$link(rel = "stylesheet", href = "style.css?v=20260906-1"),
+    tags$script(src = "radio-buttons.js?v=20260906-1"),
+    tags$script(src = "analysis-run-control.js?v=20260906-1")
+  ),
+  # Home/Overview Tab ----
+  tabPanel(
+    title = "Home",
+    value = "home",
+    id = "home",
+    div(
+      class = "home-page",
+      tags$section(
+        class = "home-hero",
+        div(
+          class = "hero-copy",
+          div(class = "eyebrow", "Single-cell gene discovery"),
+          h1("Find robust marker genes from scRNA-seq data."),
           p(
-          #   "The app offers a flexible platform for the identification of dominant genes in a single-cell RNA-sequencing (scRNA-seq) dataset which operate as disease biomarkers.
-          # It includes three different types of gene selection methods, exploiting the statistical aspect, the machine-leaning aspect along with state-of-the-art feature selection methods tailored for scRNA-seq data.
-          # The feature selection operation modes include 15 different methodologies covering a broad range of such approaches. The extracted gene list is further examined for enrichment in various biological and pharmacological features
-          # including (i) pathway terms, (ii) gene ontology (GO) terms of molecular function, biological processes and cellular components, (iii) disease terms, (iv) drug substances based on the EnrichR tool.
-          # Snapshots of KEGG pathway maps enhance the investigation of the exported genes as biomarkers and provide insight into the functional and structural characteristics of the biological system under study.
-          # The final tab offers the user the opportunity to undertake a protein-protein interaction (PPI) network analysis and similarity graph analysis. The PPI network analysis is aimed at determining the functional 
-          #   relationships between proteins by exploring the interactions between the proteins in a biological system. This information can facilitate a more comprehensive appreciation of the biological system's overall functioning and provide valuable insights into the mechanisms of diseases and potential drug targets.
-          #   The similarity graph analysis,
-          #   on the other hand, enables the identification of molecular modules within genetic networks through the assessment of the similarity between gene interaction profiles within a cell."
-            " Single-cell RNA-sequencing has transformed biomedical research, yet it faces computational analysis challenges.
-            Navigating the vast data dimensions poses several issues, with gene selection methods being paramount. 
-            Our platform, scGenesElite, adeptly pinpoints dominant genes within scRNA-seq datasets, integrating over 15 tailored feature extraction techniques. 
-            A standout feature of this app is its ensemble approach, which empowers users to craft their unique method by amalgamating one technique from each category. This tool offers an in-depth analysis of top genes, gauging their predictive accuracy and their association with various biological and drug-related ontologies. Additionally, visual aids like KEGG pathways and PPI networks offer a holistic perspective on the identified genes. 
-            Given its wide-ranging functionalities, scGenesElite stands as a comprehensive guide for uncovering and understanding transcriptional markers for intricate diseases through scRNA-seq research."
+            class = "hero-lede",
+            "Compare more than 15 feature-selection techniques, build ensemble methods, and move from expression data to interpretable biomarkers in one guided workflow."
           ),
-          
-          
-          br(),
-          br(),
-          br(),
-      
           div(
-            class = "footer",
-            p(
-              a(href = "mailto:p.paplomatas@hotmail.com", "Feel free to contact us for any issue or question at p.paplomatas@hotmail.com", 
-                style = "color:white; text-align:center; font-size: 22px; "),
+            class = "hero-actions",
+            tags$a(
+              href = "#",
+              class = "btn btn-primary btn-lg sc-nav-link",
+              `data-nav-target` = "upload",
+              icon("upload"),
+              "Upload a dataset"
+            ),
+            tags$a(
+              href = "#workflow",
+              class = "btn btn-secondary btn-lg",
+              icon("diagram-project"),
+              "Explore the workflow"
             )
           ),
-          br(),
-          
+          div(
+            class = "hero-proof",
+            span(icon("layer-group"), " 15+ selection methods"),
+            span(icon("chart-line"), " Predictive validation"),
+            span(icon("network-wired"), " Biological interpretation")
+          )
+        ),
+        div(
+          class = "hero-visual",
+          div(
+            class = "visual-frame",
+            tags$img(
+              src = "overview.jpg",
+              alt = "scGeneFinder analysis workflow overview"
+            )
+          ),
+          p(class = "visual-caption", "From uploaded counts to ranked genes, pathways and interaction networks.")
         )
-      )
-    ),
-    tabPanel (
-      tags$head(tags$style(
-        HTML("
-      .shiny-output-error-validation {
-        color: red;
-      }
-    ")
-      )),
-      title = tags$h3("Data Upload"),
-      
-      #Info button
-      dropMenu(
-        dropdownButton(
-          "Info",
-          status = 'info',
-          size = "xs",
-          icon = icon('info')
-        ),
-        h3(strong('Information')),
-        br(),
-       
-        p(
-          'The Shiny app requires single-cell RNA-sequencing data in the form of read counts with annotations.
-      The dataset needs to be formatted in a matrix with size NxE, with N cell samples and E-1 gene expressions (i.e. X(i,j) is the expression value of gene j for the cell i).
-      The app requires the annotation last column while it should have two classes (e.g., health-disease). The app can also be run with multiple classes.
-      In this case, the exported potential biomarkers indicate the separability among all classes offering the interpretation that the reader considers. It operates more effectively if data are normalized, and the initial condition (cell classes) includes a binary case study (control - state) are computed.
-         The app can also be run with multiple classes.'
-        ),
-        
-        
-        
-        
-        
-        placement = "bottom-start",
-        arrow = TRUE,
-        theme = "material",
-        maxWidth = 1000
       ),
-      
-      # Sidebar layout with input and output definitions ----
-      sidebarLayout(
-        sidebarPanel(
-          downloadButton("Example", "Example DataSet" , style = "width:100%"),
-          
-          radioButtons(
-            "organismus",
-            "Organismus:",
-            
-            choices = c("H.sapiens" = "Human",
-                        "M. musculus" = "Mouse"),
-            selected = "Mouse",
-            inline = TRUE
+      tags$section(
+        class = "capabilities-section",
+        div(class = "section-kicker", "What you can do"),
+        h2("One workspace for gene selection and interpretation"),
+        div(
+          class = "capabilities-grid",
+          div(
+            class = "capability-card",
+            div(class = "capability-icon icon-blue", icon("filter")),
+            h3("Select robust features"),
+            p("Compare variable-gene, statistical, machine-learning and SHAP-based methods with configurable thresholds.")
           ),
-          
-          radioButtons(
-            "GENEid",
-            "Genes ID",
-            choices = c(
-              "Genes Symbol" = "SYMBOL",
-              "Ensembl ID" = "EnsemblGenes",
-              "Entrez ID " = "ENTREZID"
-            ),
-            selected = "SYMBOL",
-            inline = TRUE
+          div(
+            class = "capability-card",
+            div(class = "capability-icon icon-violet", icon("code-branch")),
+            h3("Build ensembles"),
+            p("Combine complementary techniques and rank consensus biomarkers using a unified analysis pipeline.")
           ),
-          
-          # Sidebar panel for inputs ----
-          fileInput("rdsFile", "Choose RDS File", multiple = TRUE),
-          
-          # Input: Select a file ----
-          tags$hr(),
-          fileInput(
-            "file1",
-            "Choose CSV File",
-            multiple = TRUE,
-            accept = c("text/csv",
-                       "text/comma-separated-values,text/plain",
-                       ".csv")
-            
-          ),
-          
-          # Horizontal line ----
-          tags$hr(),
-          
-          # Input: Checkbox if file has header ----
-          checkboxInput("header", "Header", TRUE),
-          
-          # Input: Select separator ----
-          radioButtons(
-            "sep",
-            "Separator",
-            choices = c(
-              Comma = ",",
-              Semicolon = ";",
-              Tab = "\t"
-            ),
-            selected = ","
-          ),
-          
-          # Input: Select quotes ----
-          radioButtons(
-            "quote",
-            "Quote",
-            choices = c(
-              None = "",
-              "Double Quote" = '"',
-              "Single Quote" = "'"
-            ),
-            selected = '"'
-          ),
-          
-          # Horizontal line ----
-          tags$hr(),
-          
-          # Input: Select number of rows to display ----
-          radioButtons(
-            "disp",
-            "Display",
-            choices = c(Head = "head",
-                        All = "all"),
-            selected = "head"
+          div(
+            class = "capability-card",
+            div(class = "capability-icon icon-teal", icon("microscope")),
+            h3("Interpret biology"),
+            p("Explore enrichment results, KEGG pathway maps, heatmaps and gene-interaction networks.")
           )
-          
-        ),
-        
-        # Main panel for displaying outputs ----
-        mainPanel(# Output: Data file ----
-                  tableOutput("contents"),
-                  tableOutput("Rvalue"))
-        
-      )
-    ),
-    #Second tab
-    tabPanel (
-      title = tags$h3("Run Analysis"),
-      # dashboardSidebar layout with input and output definitions ----
-      dashboardSidebar(width = 5000,
-                       column(
-                         1,
-                         
-                         #Info Button
-                         dropMenu(
-                           dropdownButton(
-                             "Info",
-                             status = 'info',
-                             size = "xs",
-                             icon = icon('info')
-                           ),
-                           h3(strong('Variance Filter Information')),
-                           br(),
-                           h5(
-                             div(style = "color:blue",
-                                 strong("Remove Low Variance:"), ),
-                             "
-Using the nearZeroVar function from R package:Caret identifies predictors with one unique value (zero variance predictors) or predictors with both of the following characteristics: they have a small number of unique values compared to the number of samples and a high frequency of the most frequent value. A threshold option is provided as a cutoff for the percentage of distinct values in relation to the total number of samples in the dataset.
-" ,
-                             br(),
-                             div(style = "color:blue",
-                                 strong("Normalization :"), ),
-                             "
-we utilize the Seurat package for data normalization, a crucial step in single-cell RNA sequencing analysis. Specifically, we determine a scaling factor based on the mean of the column sums of the dataset. This scaling factor is then used in the LogNormalize function from Seurat to perform log normalization on the data.
-"
-                            ),
-                           
-                           placement = "bottom-start",
-                           arrow = TRUE,
-                           theme = "material",
-                           maxWidth = 1000
-                         )
-                       )),
-      #------------------------------------------------------------splitLayout
-      
-      splitLayout(
-        cellWidths = 950,
-        style = "width:auto; max-height: 50vh; overflow-x: hidden; overflow-y: auto;" ,
-        cellArgs = list(style = "padding: 6px"),
-        
-        
-        inputPanel(
-          radioButtons(
-            "VarFilter",
-            "Data Filtering:",
-            
-            choices = c(
-              "Remove Low Variance" = "Strict_Filter",
-            
-              "No Filter" = "Unselect"
-            ),
-            selected = "Strict_Filter",
-            inline = TRUE,
-          ),
-          
-          #change the size
-          tags$head(tags$style(
-            HTML(
-              '
-             #uniqueCut{height: 20px}
-             #uniqueCut{width:  100px}
-             #nfeatures{height: 20px}
-             #nfeatures{width:  100px}
-             '
-            )
-          )),
-          # numericInput function
-          numericInput("uniqueCut", "Low Variance cutoff", 15, 0, 100),
-        
-          radioButtons (
-            "Norm",
-            "Normalization:",
-            c("Normalization" = "Normal",
-              "No-Normalization" = "No_Normal"),
-            selected = "Normal",
-            inline = TRUE
-            
-          ),
-        ),
-        
+        )
       ),
-      # sidebarLayout layout with input and output definitions ----
-      sidebarLayout(
-        column(
-          1,
-          offset = 4,
-          actionButton("click", "Run Analysis",
-                      
-                       style = "flex-start"),# #position: absolute; right: -130px;  bottom: -85px
-        ),
-        column(
-          2 ,
-          offset = 2,
-          downloadLink(
-            "downloadData",
-            "Download",
-            
-            style = "color: #fefbd8; background-color: rgb(230, 50  , 50);
-                              position: absolute;   bottom: -60px",
-          )
-        ),
-        
-        
-        
+      tags$section(
+        id = "workflow",
+        class = "workflow-section",
+        div(class = "section-kicker", "Guided analysis"),
+        h2("A clear path from data to biological insight"),
+        div(
+          class = "workflow-steps",
+          div(class = "workflow-step", span(class = "step-number", "1"), div(h3("Upload"), p("Import CSV or RDS data and verify its structure."))),
+          div(class = "workflow-step", span(class = "step-number", "2"), div(h3("Configure"), p("Choose preprocessing and gene-selection methods."))),
+          div(class = "workflow-step", span(class = "step-number", "3"), div(h3("Analyze"), p("Rank genes and validate their predictive performance."))),
+          div(class = "workflow-step", span(class = "step-number", "4"), div(h3("Interpret"), p("Explore pathways, enrichment and networks.")))
+        )
       ),
-      #------------------------------------------------------------dashboardSidebar
-      dashboardSidebar(
-        width = 450,
-        column(
-          width = 1,
-          dropMenu(
-            dropdownButton(
-              "Info",
-              status = 'info',
-              size = "xs",
-              icon = icon('info')
-            ),
-            
-            h3(strong('Information')),
-            br(),
-            h5(
-              "In this suite of analysis tools, a wide range of strategies are provided for the analysis of the data. These include methods for identifying variable genes based on single cell RNA sequencing, statistical approaches based on p-value and LogFC threshold, and Feature Selection through tree-based ML models. A unique feature of this suite is the ability for the user to create their own ensemble method by combining one or more of these methods. Additionally, various threshold options are available for each method (for more information, consult the tutorial provided). It should be noted that each method employs a distinct approach and may require varying amounts of computational resources, depending on the size of the data. Therefore, it is recommended that the user employs preprocessing filters to reduce the data size and improve the reliability of the results. The normalization button allows the user to normalize their data prior to analysis. On the Ensemble tab, the options selected from the previous tabs for the various methods are applied. The genes identified through the analysis are depicted in a visual format utilizing both a barplot and a heatmap. The heatmap specifically uses cell type predict or State labeling as a method to organize and present the data. The state retains the labels provided in the dataset by the user, or the cell type prediction utilizes the singleR package for cell type annotation. Furthermore, a classification K-nearest neighbors (K-nn) model is executed to assess the ability of the model to accurately classify based solely on the isolated genes. The results of the K-NN analysis are presented in a comprehensive manner through the utilization of a confusion matrix and a data table."
-            )
-            ,
-            
-            
-            placement = "bottom-start",
-            #"light-border"
-            arrow = TRUE,
-            theme = "material",
-            maxWidth = 1000
-          )
+      tags$footer(
+        class = "app-footer",
+        div(
+          div(class = "footer-brand", "scGeneFinder"),
+          p("A focused workspace for single-cell marker discovery.")
         ),
-        
-        
-        strong("Genes Selection Methods", style =
-                 "color:black")
-      ),
-      
-      br(),
-      #TabsetS
-      tabsetPanel(
-        type = "tabs",
-        
-    
-        # Variable Genes Tab
-        tabPanel(
-          "HVGs",
-          
-          # ---------------sidebarPanel
-          sidebarPanel(
-            
-            fluidRow(
-              column(
-                12,
-                radioButtons(
-                  'VariableM',
-                  label    = "HVGs Methods:",
-                  choices = list(
-                    "SCMarker"       = "SCMarker",
-                    "scran"       = "DUBStepR",
-                    "ScPNMF"         =  "ScPNMF",
-                    "VST"          = "SelfE" ,
-                    "M3Drop"          = "M3Drop" ,
-                    "None" = "NoMethod"
-                  ),
-                  selected = "NoMethod"
-                  
-                ),
-              ),
-              strong(div(style = "color:black",
-                         "Parameters Selection:", ), ),
-              
-              #Give the right size
-              tags$head(tags$style(
-                HTML(
-                  '
-        #cellK{height: 20px}
-        #cellK{width:  80px}
-        #geneK{height: 20px}
-        #geneK{width:  80px}
-        #n{height: 20px}
-        #n{width:  80px}
-        #k{height: 20px}
-        #k{width:  80px}
-        #np{height: 20px}
-        #np{width:  80px}
-        #distMethod{height: 20px}
-        #distMethod{width:  80px}
-        #gM{height: 20px}
-        #gM{width:  80px}
-        #M3dropthreshold{height: 20px}
-        #M3dropthreshold{width:  90px}
-        #M3Method{height: 20px}
-        #M3Method{width:  80px}
-
-
-
-    '
-                )
-              )),
-              
-              fluidRow(
-                column(4, div(style = "color:black", "SCMarker:")),
-                column(4, numericInput("geneK", "geneK", value = 20, min = 0, step = 1)),
-                column(4, numericInput("cellK", "cellK", value = 20, min = 0, step = 1))
-              ),
-              fluidRow(
-                column(4, div(style = "color:black", "scran:")),
-                column(8, numericInput("np", "num.Genes", value = 300, min = 1, step = 1))
-              ),
-              fluidRow(
-                column(4, div(style = "color:black", "ScPNMF:")),
-                column(8, numericInput("gM", "M Genes #", value = 300, min = 1, step = 1))
-              ),
-              fluidRow(
-                column(4, div(style = "color:black", "M3Drop:")),
-                column(4, numericInput("M3dropthreshold", "mt_threshold", value = 0.001, min = 0, max = 1, step = 0.01)),
-                column(4, selectInput("M3Method", "mt_method", c("bon" = "bon", "fdr" = "fdr")))
-              ),
-              fluidRow(
-                column(4, div(style = "color:black", "VST:")),
-                column(4, numericInput("n", "# Features", value = 300, min = 1, step = 1)),
-                column(4, selectInput("distMethod", "distMethod", c("EucDist" = "EucDist", "KL" = "KL", "DPNMF" = "DPNMF")))
-              ),
-              
-              
-            )  ,
-            
-            
-            
-          ),
-        ),
-        
-        
-        
-        # ---------------P-value tab
-        tabPanel(
-          "DEGs",
-          
-          # ---------------sidebarPanel
-          sidebarPanel(
-            position = "right",
-            width = 4,
-            
-            
-            
-            radioButtons (
-              "P_method",
-              "DEGs Methods:",
-              c(
-                "Wilcoxon rank sum test" = "Seurat_method",
-                "Beta-Poisson generalized linear model" = "BPSC_metchod",
-                "Wald test" = "MAST_method",
-                "Likelihood Ratio Test" = "DESeq2_method",
-                "None" = "Empty"
-              ),
-              selected = "Empty",
-            ),
-            
-            
-            numericInput(
-              "PvalueNum",
-              "P-Value Threshold",
-              value = 0.01,
-              min = 0.001,
-              max = 0.99,
-              step = 0.01
-            ),
-            numericInput(
-              "logfc",
-              "LogFC Threshold",
-              value = 1,
-              min = 0,
-              max = 5,
-              step = 0.1
-            )
-            
-          ),
-          
-        ),
-        # ---------------Wrapper Based ML tab
-        # tabPanel(
-        #   "Non Tree-based ML",
-        #   
-        #   
-        #   # ---------------sidebarPanel
-        #   sidebarPanel(
-        #     position = "right",
-        #     width = 4,
-        #     
-        #     
-        #     
-        #     
-        #     
-        #     selectInput(
-        #       "Wrapper_ML_Method",
-        #       "Non Tree Based Machine Learning Methods:",
-        #       c(
-        #         "Linear Discriminant Analysis" = "lda",
-        #         "Lasso and Elastic-Net Regularized Generalized Linear Models" = "glmnet",
-        #         "K-nearest neighbors algorithm" = "knn",
-        #         "Support Vector Machine-Radial" = "svmRadial",
-        #         "None" = "Empty"
-        #         
-        #       ),
-        #       selected = "Empty",
-        #     ),
-        #     numericInput(
-        #       "importanceLimit",
-        #       "Significant Threshold",
-        #       value = 30,
-        #       min = 0,
-        #       max = 100,
-        #       step = 1
-        #     ),
-        #     
-        #     
-        #     
-        #     
-        #   ) ,
-        # ),
-        # ---------------Tree Based ML Tab
-        tabPanel(
-          "Feature Selection",
-          
-          
-          # ---------------sidebarPanel
-          sidebarPanel(
-            position = "right",
-            width = 4,
-            
-            
-            
-            selectInput(
-              "ML_Method",
-              "Feature Selection through tree-based ML models:",
-              c(
-                "Random Forest Algorithm" = "rf",
-                "eXtreme Gradient Boosting" = "xgbTree",
-                "Bagged CART" = "treebag",
-                "Recursive Partitioning and Regression Trees" = "rpart",
-                "C5.0 Decision Trees and Rule-Based Models" = "C5.0",
-                "None" = "Empty"
-                
-              ),
-              selected = "Empty",
-            ),
-            numericInput(
-              "importanceLimit",
-              "Significant Threshold",
-              value = 10,
-              min = 0,
-              max = 100,
-              step = 1
-            ),
-            
-            
-            
-            
-          ) ,
-        ),
-        # ---------------Ensemble Approach  Tab
-        tabPanel(
-          "Ensemble Approach",
-          p("⚠ The selection parameters of the methods, which were selected in the previous tabs, remain consistent for the Ensemble approach !"),
-          
-          # ---------------sidebarPanel
-          sidebarPanel(
-            position = "right",
-            width = 4,
-            
-            radioButtons(
-              'ensembleVar',
-              label    = "HVGs Methods:",
-              choices = list(
-                "SCMarker"       = "SCMarker",
-                "scran"       = "DUBStepR",
-                "ScPNMF"         =  "ScPNMF",
-                "M3Drop"          = "M3Drop" ,
-                "VST"          = "SelfE" ,
-                
-                "None" = "NoMethod"
-              ),
-              selected = "NoMethod"
-              
-            ),
-            
-            radioButtons(
-              'ensemblePvalue',
-             label    = "DEGs Methods:",
-              choices = list(
-                "Wilcoxon rank sum test" = "Seurat_method",
-                "Beta-Poisson generalized linear model" = "BPSC_metchod",
-                "Wald test" = "MAST_method",
-                "Likelihood Ratio Test" = "DESeq2_method",
-                "None" = "NoMethod"
-              ),
-              selected = "NoMethod"
-              
-            ),
-            
-            radioButtons(
-              'ensembleWrapper',
-              label    = "Tree Based FS Methods:",
-              choices = list(
-                "Random Forest Algorithm" = "rf",
-                "eXtreme Gradient Boosting" = "xgbTree",
-                "Bagged CART" = "treebag",
-                "Recursive Partitioning and Regression Trees" = "rpart",
-                "C5.0 Decision Trees and Rule-Based Models" = "C5.0",
-                "None" = "NoMethod"
-              ),
-              selected = "NoMethod"
-              
-            ),
- 
-            
-          ) ,
-        ),
-        
-        
-      ),
-      
-      
-      # -----------   Main panel for displaying outputs
-      mainPanel(tableOutput("text")),
-      
-      
-      
-      # -----------   sidebarPanel
-      sidebarPanel(
-        position = "right",
-        width = 8,
-        
-        sidebarLayout(
-          column(
-            12,
-            
-            sliderInput(
-              "genes",
-              "Number of genes:",
-              
-              min = 2,
-              max = 500,
-              value = 100
-            ),
-          ),
-         
-          column(
-          
-            12,
-            p("⚠ Don't forget to choose the right Organismus and Genes iD !!! "),
-            checkboxInput("HeatMap1", "Heatmap🔥", value = FALSE),
-            
-            column(
-              width = 2,
-             
-              radioButtons(
-                "clustering",
-                "Heatmap Clustering:",
-                
-                choices = c("Between Groups" = "cluster_between_groups",
-                            "None" = "None_Clustering"),
-                selected = "None_Clustering",
-                inline = TRUE
-              )
-            ),
-            column(
-              width = 2,
-              radioButtons(
-                "Split",
-                "Heatmap Splitting:",
-                
-                choices = c("Cell Type Predict" = "CellType",
-                            "State" = "labels"),
-                selected = "CellType",
-                inline = TRUE
-              )
-            ),
-            
-          ),
-          
-        ),
-        column(12,
-               mainPanel(
-                 tableOutput("error"),
-                 
-                 splitLayout(
-                   cellWidths = 880,
-                   tags$div(
-                     plotOutput("TheBarPlot"),
-                     width = "100%",
-                     height = "400",
-                     style = "margin-top: 40px;"
-                   ),
-                  
-                   tags$div(tableOutput("GenesList"), style = "margin-top: 18px; height: 40vh; width: 48vh;  overflow-x: hide;
-                               overflow-y: scroll; "),
-                   
-                  
-                 ),
-                 
-               ), ),
-        column(12,
-               mainPanel(
-
-                 splitLayout(
-                   cellWidths = 950,
-                   tags$div(
-                     plotOutput("KnnClassifier"),
-                     width = "100%",
-                     height = "400",
-                     style = "margin-top: 20px;"
-                   ),
-                   
-                   
-                   
-                 ),
-                 
-               ), ),
-        
-        column(12,
-               mainPanel(
-                 
-                 splitLayout(
-                   cellWidths = 1000,
-                   tags$div(
-                     plotOutput("HeatMap"),
-                     width = "100%",
-                     height = "400",
-                     style = "margin-top: 40px;"
-                   ),
-                   # margin-left: 100px;
-                   tags$div(tableOutput("HeatmapList"), style = "margin-top: 18px; height: 45vh; width: 30vh;  overflow-x: hide;
-                               overflow-y: scroll; "),
-                   
-                   
-                 ),
-                 
-               ), ),
-        
-        
-      ),
-      
-      
-      
-    ),
-    
-    # -----------   Enrichment Analysis Tab
-    tabPanel (
-      title = tags$h3("Enrichment Analysis"),
-      
-      #Info Button
-      dropMenu(
-        dropdownButton(
-          "Info",
-          status = 'info',
-          size = "xs",
-          icon = icon('info'),
-          width = 500
-        ),
-        h3(strong('Information')),
-        br(),
-        h5(
-          'In this section, the user is provided with the capability to investigate the potential biomarkers that have been identified through previous analysis. The user has the option to select either the entire set of isolated genes or a specific subset of genes. For example, if the user selects 50 genes, the top 50 genes with the highest scores will be selected for further analysis. Additionally, the user has the option to select from 18 different Pathways Datasets, which are divided into three distinct categories: Biological Pathway, Biological Ontologies, and Diseases-Drugs. The user can choose to analyze a specific pathway, a combination of three ontology terms, or all available ontology terms. The Enrichr database is utilized to perform this analysis.  '
-        ),
-        
-        placement = "bottom-start",
-        arrow = TRUE,
-        theme = "material",
-        maxWidth = 1000
-      ),
-      
-      fluidRow(
-        # -----------   sidebarPanel
-        sidebarPanel(
-          position = "right",
-          width = 12,
-          
-          sliderInput(
-            "genes1",
-            "Select the number of genes for the enrichment analysis:",
-            
-            min = 10,
-            max = 9000,
-            value = 50,
-            step = 1
-          ),
-          column(
-            3,
-            (""),
-            checkboxInput("all", "All Available Ontology Terms", value = FALSE)
-          ),
-          
-          
-          
-          column(3,
-                 selectInput(
-                   "BP",
-                   "Biological Pathway",
-                   c(
-                     "-",
-                     "KEGG 2021 Human" = "KEGG_2021_Human",
-                     "WikiPathway 2021 Human" = "WikiPathway_2021_Human",
-                     "BioPlanet 2019" = "BioPlanet_2019",
-                     "BioCarta 2016" = "BioCarta_2016",
-                     "MSigDB Hallmark 2020" = "MSigDB_Hallmark_2020",
-                     "Reactome 2016" = "Reactome_2016"
-                     
-                   )
-                 )),
-          column(3,
-                 selectInput(
-                   "BO",
-                   "Biological Ontologies",
-                   c(
-                     "-",
-                     "GO Biological Process 2021" = "GO_Biological_Process_2021",
-                     "GO Molecular Function 2021" = "GO_Molecular_Function_2021",
-                     "GO Cellular Component 2021" = "GO_Cellular_Component_2021",
-                     "MGI Mammalian Phenotype Level 4 2021" = "MGI_Mammalian_Phenotype_Level_4_2021",
-                     "Human Phenotype Ontology" = "Human_Phenotype_Ontology",
-                     "Jensen_DISEASES" = "Jensen_DISEASES"
-                     
-                     
-                   )
-                 )),
-          column(3,
-                 selectInput(
-                   "DD",
-                   "Diseases-Drugs",
-                   c(
-                     "-",
-                     "DisGeNET" = "DisGeNET",
-                     "DSigDB" = "DSigDB",
-                     "DrugMatrix" = "DrugMatrix",
-                     "OMIM Disease" = "OMIM_Disease",
-                     "HDSigDB Human 2021" = "HDSigDB_Human_2021",
-                     "COVID-19 Related Gene_Sets 2021" = "COVID-19_Related_Gene_Sets_2021"
-                     
-                     
-                   )
-                 )),
-          column(3,
-                 actionButton("click1", "Enrichment Analysis ")),
-           column(
-             7,
-          # 
-          #   downloadButton("GP", "Export Plots"),
-          #   downloadButton("GT", "Export Tables"),
-          ),
-          br(),
-          fluidRow(sidebarPanel(mainPanel(
-            tags$div( plotOutput("BioBarPlot", width = "215%", height = "1300"),
-                      style = "margin-top: 80px;  margin-left: -480px;"),
-            
-            tableOutput('Enrichment'),
-            
-          ), ))
+        div(
+          class = "footer-contact",
+          span("Questions or support?"),
+          a(href = "mailto:p.paplomatas@hotmail.com", icon("envelope"), " p.paplomatas@hotmail.com")
         )
       )
     )
-    
-    ,
-    # -----------   KEGG Tab
-    tabPanel(
-      tags$h3("KEGG Maps"),
-      value = 1,
-      dropMenu(
-        dropdownButton(
-          "Info",
-          status = 'info',
-          size = "xs",
-          icon = icon('info')
-        ),
-        h3(strong('Information')),
-        br(),
-        h5(
-          'In this tab, the user is presented with the capability to visualize the KEGG Pathway Maps, which provide a holistic understanding of the functional and structural aspects of the biological system under investigation. This is achieved by mapping the isolated genes onto the KEGG Pathway Maps. The user is provided with a data frame containing the pathway identifiers, and can simply copy the desired identifier and press the "go" button to initiate the visualization process. It is important to note that the correct organism must be selected in the first tab prior to utilizing this feature, as the KEGG Pathway Maps are organism-specific.'
-        ),
-        
-        
-        
-        
-        
-        placement = "bottom-start",
-        arrow = TRUE,
-        theme = "material",
-        maxWidth = 1000
+  ),
+  tabPanel(
+    title = "Data Upload",
+    value = "upload",
+    div(
+      class = "page-header",
+      div(
+        div(class = "eyebrow", "Step 1 of 4"),
+        h1("Upload and validate your dataset"),
+        p("Choose the organism and identifier format, then upload a CSV or RDS expression matrix. The preview helps you confirm the structure before analysis.")
       ),
-      # -----------   sidebarLayout
-      sidebarLayout(
-        # -------------- sidebarPanel
-        sidebarPanel(
-          h5("Give ID of KEGG pathways. ⚠ Don't forget to choose the right Organismus !!!"),
-          textInput("inText", "Pathway iD"),
-          column(
-            1,
-            offset = 2,
-            actionButton("click2", "  Go  ",
-                         style = "position: absolute; right: -130px; bottom: -72px")
-          ),
-        ),
-        
-        # Main panel for displaying outputs ----
-        mainPanel(
-          dataTableOutput("KEGG"),
-          textOutput ("text1"),
-          
-          sidebarPanel(
-            position = "left",
-            width = 12,
-            
-            
-            plotOutput("KEGGmap", width = "100%",height = 1000) ,#, width = "100%", height = 500
-            
-            
-          )
-        )
-        
-        
+      downloadButton(
+        "Example",
+        "Download example CSV",
+        class = "btn btn-secondary",
+        icon = icon("download")
       )
     ),
-    
-    # ----- Graphs Network Tab
-    tabPanel(
-      title = tags$h3("Graph Analysis"),
-      
-      dropMenu(
-        dropdownButton(
-          "Info",
-          status = 'info',
-          size = "xs",
-          icon = icon('info')
+    tags$details(
+      class = "requirements-card",
+      tags$summary(icon("circle-info"), " Dataset requirements"),
+      div(
+        class = "requirements-content",
+        tags$ul(
+          tags$li("Rows represent cells and expression columns represent genes."),
+          tags$li("The final column must contain the class or state annotation."),
+          tags$li("Both binary and multiclass annotations are supported."),
+          tags$li("CSV and RDS files are accepted; normalized values are recommended.")
         ),
-        h3(strong('Information')),
-        br(),
-        h5(
-          'On the final tab, the user is provided with the capability to perform protein-protein interaction (PPI) network analysis and similarity graph analysis. The user can specify a threshold for the PPI network, which ensures that only interactions with a combined score greater than the specified threshold are included in the network. The PPI network is based on the STRINGdb database, which is a widely used database for protein-protein interactions. The similarity graph feature allows the user to discover molecular modules in genetic networks by measuring the similarity between the profiles of gene interactions in a cell. A pearson correlation threshold is available for this analysis, allowing the user to adjust the level of similarity required for two genes to be considered as similar.'
-        ),
-        
-        
-        
-        
-        
-        placement = "bottom-start",
-        arrow = TRUE,
-        theme = "material",
-        maxWidth = 1000
-      ),
-      
+        p(strong("Expected shape:"), " N x E, where N is the number of cells and E - 1 is the number of genes.")
+      )
+    ),
+    sidebarLayout(
       sidebarPanel(
         width = 4,
-        
-          column(
-            12,
-            p(
-              "Select the number of genes to analyze based on the scoring priority of the algorithm used in the analysis.⚠ Don't forget to choose the right Organismus !!! " ,
-            sliderInput(
-              "Genes",
-              "Number of  Genes:",
-              
-              min = 2,
-              max = 3000,
-              value = 50
-            ) ) ),
-         
-        checkboxInput(
-          "PPInetwork1",
-          "Protein–protein interaction (PPI) network analysis ️🕸",
-          value = FALSE
-        ),
-        
-        numericInput(
-          "Score_Threshold_PPI",
-          "Conditionally load interactions based on a threshold.",
-          value = 400,
-          min = 50,
-          max = 1000,
-          step = 10
-        ),
-        
-        checkboxInput("graph1", "Similarity Graph 📊", value = FALSE),
-        numericInput(
-          "Pearson_correlation",
-          " Remove edges below absolute Pearson correlation",
-          value = 0.5,
-          min = 0.1,
-          max = 0.99,
-          step = 0.1
-        ),
-        
-        
-        column(
-          width = 4,
-          actionButton("run_button1", "Plotting Graphs", style = "position: absolute; right: -145px; bottom: -72px")
-        ),
+        div(
+          class = "section-card upload-settings",
+          div(class = "section-heading", div(h2("Dataset settings"), p("These choices are used by downstream annotation and pathway tools.")), icon("sliders")),
+          div(
+            class = "form-section",
+            h3("Organism"),
+            radioButtons(
+              "organismus",
+              label = NULL,
+              choices = c("H. sapiens" = "Human", "M. musculus" = "Mouse"),
+              selected = "Mouse",
+              inline = TRUE
+            )
+          ),
+          div(
+            class = "form-section",
+            h3("Gene identifier"),
+            radioButtons(
+              "GENEid",
+              label = NULL,
+              choices = c("Gene Symbol" = "SYMBOL", "Ensembl ID" = "EnsemblGenes", "Entrez ID" = "ENTREZID"),
+              selected = "SYMBOL",
+              inline = TRUE
+            )
+          ),
+          div(
+            class = "form-section upload-files",
+            h3("Expression file"),
+            p(class = "form-help", "Upload either one RDS file or one CSV file."),
+            div(
+              class = "file-field",
+              div(class = "file-type", icon("file-code"), span("RDS")),
+              fileInput("rdsFile", label = NULL, buttonLabel = "Choose RDS", placeholder = "No file selected", multiple = FALSE, accept = ".rds")
+            ),
+            div(class = "upload-separator", span("or")),
+            div(
+              class = "file-field",
+              div(class = "file-type", icon("file-csv"), span("CSV")),
+              fileInput(
+                "file1",
+                label = NULL,
+                buttonLabel = "Choose CSV",
+                placeholder = "No file selected",
+                multiple = FALSE,
+                accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+              )
+            )
+          ),
+          tags$details(
+            class = "advanced-options",
+            tags$summary(icon("wrench"), " CSV parsing options"),
+            div(
+              class = "advanced-options-content",
+              radioButtons("header", "Header row", choices = list("Yes" = TRUE, "No" = FALSE), selected = TRUE, inline = TRUE),
+              radioButtons("sep", "Separator", choices = c("Comma" = ",", "Semicolon" = ";", "Tab" = "\t"), selected = ",", inline = TRUE),
+              radioButtons("quote", "Quote character", choices = c("None" = "", "Double quote" = '"', "Single quote" = "'"), selected = '"', inline = TRUE),
+              radioButtons("disp", "Preview size", choices = c("First 10 rows" = "head", "Up to 1,000 rows" = "all"), selected = "head", inline = FALSE)
+            )
+          )
+        )
       ),
-      # Main panel for displaying outputs ----
       mainPanel(
-        tableOutput("text3"),
-        
-        
-        
-        column(
-          width = 3,
-          plotOutput("PPInetwork", width = "450%", height = "850"),
-          visNetworkOutput("graph", width = "450%", height = "850")
-          
+        width = 8,
+        div(
+          class = "section-card preview-card",
+          div(
+            class = "section-heading",
+            div(h2("Data preview"), p("Verify genes, annotations and table orientation before continuing.")),
+            span(class = "status-chip", icon("shield"), " Validation enabled")
+          ),
+          conditionalPanel(
+            condition = "output.uploadState !== 'ready'",
+            div(
+              class = "empty-state upload-empty-state",
+              div(class = "empty-state-icon", icon("table-cells-large")),
+              h3("Your dataset preview will appear here"),
+              p("Upload a CSV or RDS file using the sidebar to preview your dataset here.")
+            )
+          ),
+          conditionalPanel(
+            condition = "output.uploadState === 'ready'",
+            div(
+              class = "data-preview-output",
+              DT::dataTableOutput("contents"),
+              DT::dataTableOutput("Rvalue")
+            )
+          )
+        ),
+        div(
+          class = "next-step-card",
+          div(icon("arrow-right"), div(h3("Next: configure gene selection"), p("After validating the preview, continue to Run Analysis."))),
+          tags$a(href = "#", class = "btn btn-primary sc-nav-link", `data-nav-target` = "analysis", "Continue")
         )
       )
+    )
+  ),
+
+    # Run Analysis Tab
+    tabPanel(
+      title = "Run Analysis",
+      value = "analysis",
+      div(
+        class = "page-header analysis-page-header",
+        div(
+          div(class = "eyebrow", "Steps 2 and 3 of 4"),
+          h1("Configure and run gene selection"),
+          p("Choose preprocessing, select one method or build an ensemble, then generate ranked biomarkers and validation plots.")
+        ),
+        div(
+          class = "page-header-help",
+          icon("lightbulb"),
+          span("Start with one method from a single category, then compare with an ensemble.")
+        )
+      ),
+      div(
+        class = "section-card preprocessing-card",
+        div(
+          class = "section-heading",
+          div(h2("Preprocessing"), p("Prepare the expression matrix before feature selection.")),
+          div(
+            class = "info-actions",
+            dropMenu(
+              dropdownButton("Filtering help", status = "info", size = "sm", icon = icon("circle-info")),
+              h3("Variance filtering"),
+              p("The low-variance filter identifies zero-variance predictors and features with very few distinct values relative to sample frequency."),
+              p("The cutoff controls how aggressively low-information genes are removed."),
+              placement = "bottom-end",
+              arrow = TRUE,
+              theme = "material",
+              maxWidth = 520
+            ),
+            dropMenu(
+              dropdownButton("Workflow help", status = "info", size = "sm", icon = icon("circle-question")),
+              h3("Analysis workflow"),
+              p("Variable-gene, statistical, machine-learning and SHAP methods use different selection strategies. Ensembles combine choices made in the method tabs."),
+              p("Reducing uninformative features first can improve reliability and computational performance."),
+              placement = "bottom-end",
+              arrow = TRUE,
+              theme = "material",
+              maxWidth = 560
+            )
+          )
+        ),
+        div(
+          class = "preprocessing-grid",
+          div(
+            class = "form-block",
+            h3(icon("filter"), " Variance filter"),
+            radioButtons(
+              "VarFilter",
+              label = NULL,
+              choices = c("Remove low variance" = "Strict_Filter", "No filter" = "Unselect"),
+              selected = "Strict_Filter",
+              inline = TRUE
+            ),
+            numericInput("uniqueCut", "Low-variance cutoff (%)", 15, 0, 100, width = "100%")
+          ),
+          div(
+            class = "form-block",
+            h3(icon("chart-simple"), " Normalization"),
+            radioButtons(
+              "Norm",
+              label = NULL,
+              choices = c("LogNormalize" = "Normal", "Keep uploaded values" = "No_Normal"),
+              selected = "Normal",
+              inline = TRUE
+            ),
+            p(class = "form-help", "LogNormalize uses a scaling factor derived from the expression matrix.")
+          )
+        )
+      ),
       
+      # Main layout with sidebar and main content
+      sidebarLayout(
+        # Sidebar Panel for Genes Selection Methods
+        sidebarPanel(
+          width = 4,
+          div(class = "method-panel-heading", div(class = "eyebrow", "Method configuration"), h2("Gene-selection methods"), p("Choose a category and configure its parameters.")),
+          tabsetPanel(
+            type = "tabs",
+            
+            # Variable Genes Tab
+            tabPanel(
+              "Variable Genes",
+              
+              # HVGs Methods
+              radioButtons(
+                'VariableM',
+                label = "HVGs Methods:",
+                choices = list(
+                  "SCMarker"       = "SCMarker",
+                  "scran"       = "DUBStepR",
+                  "ScPNMF"         =  "ScPNMF",
+                  "VST"          = "SelfE" ,
+                  "M3Drop"          = "M3Drop" ,
+                  "None" = "NoMethod"
+                ),
+                selected = "NoMethod"
+              ),
+              
+              conditionalPanel(
+                condition = "input.VariableM != 'NoMethod'",
+                h3(class = "parameter-heading", "Method parameters")
+              ),
+              conditionalPanel(
+                condition = "input.VariableM == 'SCMarker'",
+                fluidRow(
+                  column(4, div("SCMarker")),
+                  column(4, numericInput("geneK", "geneK", value = 20, min = 0, step = 1)),
+                  column(4, numericInput("cellK", "cellK", value = 20, min = 0, step = 1))
+                )
+              ),
+              conditionalPanel(
+                condition = "input.VariableM == 'DUBStepR'",
+                fluidRow(
+                  column(4, div("scran")),
+                  column(8, numericInput("np", "Number of genes", value = 300, min = 1, step = 1))
+                )
+              ),
+              conditionalPanel(
+                condition = "input.VariableM == 'ScPNMF'",
+                fluidRow(
+                  column(4, div("ScPNMF")),
+                  column(8, numericInput("gM", "Number of genes", value = 300, min = 1, step = 1))
+                )
+              ),
+              conditionalPanel(
+                condition = "input.VariableM == 'M3Drop'",
+                fluidRow(
+                  column(4, div("M3Drop")),
+                  column(4, numericInput("M3dropthreshold", "Threshold", value = 0.001, min = 0, max = 1, step = 0.01)),
+                  column(4, selectInput("M3Method", "Adjustment", c("Bonferroni" = "bon", "FDR" = "fdr")))
+                )
+              ),
+              conditionalPanel(
+                condition = "input.VariableM == 'SelfE'",
+                fluidRow(
+                  column(4, div("VST")),
+                  column(4, numericInput("n", "Number of features", value = 300, min = 1, step = 1)),
+                  column(4, selectInput("distMethod", "Distance method", c("Euclidean" = "EucDist", "KL" = "KL", "DPNMF" = "DPNMF")))
+                )
+              )
+            ),
+            
+            # DEGs Tab
+            tabPanel(
+              "Statistical",
+              
+              radioButtons (
+                "P_method",
+                "DEGs Methods:",
+                c(
+                  "Wilcoxon rank sum test" = "Seurat_method",
+                  "Beta-Poisson generalized linear model" = "BPSC_metchod",
+                  "Wald test" = "MAST_method",
+                  "Likelihood Ratio Test" = "DESeq2_method",
+                  "None" = "Empty"
+                ),
+                selected = "Empty"
+              ),
+              
+              conditionalPanel(
+                condition = "input.P_method != 'Empty'",
+                numericInput(
+                  "PvalueNum",
+                  "P-value threshold",
+                  value = 0.01,
+                  min = 0.001,
+                  max = 0.99,
+                  step = 0.01
+                ),
+                numericInput(
+                  "logfc",
+                  "LogFC threshold",
+                  value = 1,
+                  min = 0,
+                  max = 5,
+                  step = 0.1
+                )
+              )
+            ),
+            
+            # Machine Learning Feature Selection Tab
+            tabPanel(
+              "Machine Learning",
+              
+              selectInput(
+                "ML_Method",
+                "Tree-based ML Feature Selection Methods:",
+                c(
+                  "Random Forest Algorithm" = "rf",
+                  "eXtreme Gradient Boosting" = "xgbTree",
+                  "Bagged CART" = "treebag",
+                  "Recursive Partitioning and Regression Trees" = "rpart",
+                  "C5.0 Decision Trees and Rule-Based Models" = "C5.0",
+                  "None" = "Empty"
+                ),
+                selected = "Empty"
+              ),
+              conditionalPanel(
+                condition = "input.ML_Method != 'Empty'",
+                numericInput(
+                  "importanceLimit",
+                  "Importance threshold",
+                  value = 10,
+                  min = 0,
+                  max = 100,
+                  step = 1
+                ),
+                div(class = "inline-note", icon("circle-info"), span("Tree-based methods rank genes by feature importance."))
+              )
+            ),
+            
+            # SHAP Values Tab (Separate)
+            tabPanel(
+              "SHAP Values",
+              
+              #Info Button for SHAP Values
+              dropMenu(
+                dropdownButton(
+                  "SHAP Info",
+                  status = 'info',
+                  size = "xs",
+                  icon = icon('info-circle')
+                ),
+                h3(strong('SHAP Values Information')),
+                br(),
+                h5(
+                  "SHAP Values (SHapley Additive exPlanations) provide a unified approach to explain the output of any machine learning model. 
+                They are based on game theory and offer several advantages over traditional feature importance methods:
+                
+                1. **Model Interpretability**: SHAP values explain how each feature contributes to the model's prediction
+                2. **Feature Interactions**: They account for interactions between features
+                3. **Consistency**: SHAP values are consistent across different models
+                4. **Robustness**: More stable than other feature importance methods
+                
+                In scGeneFinder, SHAP values are calculated for Random Forest and XGBoost models to identify the most important genes for classification.
+                The method splits data into training (75%) and test (25%) sets, trains the model, and calculates REAL SHAP values using Monte Carlo simulations for feature importance ranking."
+                ),
+                
+                placement = "bottom-start",
+                arrow = TRUE,
+                theme = "material",
+                maxWidth = 1000
+              ),
+              
+              selectInput(
+                "SHAP_Method",
+                "SHAP Values Methods:",
+                c(
+                  "SHAP Values (Random Forest)" = "shap_rf",
+                  "SHAP Values (XGBoost)" = "shap_xgb",
+                  "None" = "Empty"
+                ),
+                selected = "Empty"
+              ),
+              conditionalPanel(
+                condition = "input.SHAP_Method != 'Empty'",
+                numericInput(
+                  "SHAP_importanceLimit",
+                  "SHAP importance threshold",
+                  value = 0.01,
+                  min = 0,
+                  max = 100,
+                  step = 0.001
+                ),
+                div(class = "inline-note", icon("lightbulb"), span("Use 0.001–0.1 for absolute SHAP values, or an integer for a top-N cutoff."))
+              )
+            ),
+            
+            # Ensemble Approach Tab
+            tabPanel(
+              "Ensemble",
+              div(class = "alert alert-info",
+                HTML('<strong>Note:</strong> The selection parameters of the methods, which were selected in the previous tabs, remain consistent for the Ensemble approach!')
+              ),
+              div(class = "alert alert-info",
+                HTML('<strong>Tip:</strong> SHAP Values methods are now available for ensemble analysis, providing interpretable feature importance based on game theory principles.')
+              ),
+              
+              radioButtons(
+                'ensembleVar',
+                label    = "HVGs Methods:",
+                choices = list(
+                  "SCMarker"       = "SCMarker",
+                  "scran"       = "DUBStepR",
+                  "ScPNMF"         =  "ScPNMF",
+                  "M3Drop"          = "M3Drop" ,
+                  "VST"          = "SelfE" ,
+                  "None" = "NoMethod"
+                ),
+                selected = "NoMethod"
+              ),
+              
+              radioButtons(
+                'ensemblePvalue',
+                label    = "DEGs Methods:",
+                choices = list(
+                  "Wilcoxon rank sum test" = "Seurat_method",
+                  "Beta-Poisson generalized linear model" = "BPSC_metchod",
+                  "Wald test" = "MAST_method",
+                  "Likelihood Ratio Test" = "DESeq2_method",
+                  "None" = "NoMethod"
+                ),
+                selected = "NoMethod"
+              ),
+              
+              radioButtons(
+                'ensembleWrapper',
+                label    = "Machine Learning Methods:",
+                choices = list(
+                  "Random Forest Algorithm" = "rf",
+                  "eXtreme Gradient Boosting" = "xgbTree",
+                  "Bagged CART" = "treebag",
+                  "Recursive Partitioning and Regression Trees" = "rpart",
+                  "C5.0 Decision Trees and Rule-Based Models" = "C5.0",
+                  "None" = "NoMethod"
+                ),
+                selected = "NoMethod"
+              ),
+              
+              radioButtons(
+                'ensembleSHAP',
+                label    = "SHAP Values Methods:",
+                choices = list(
+                  "SHAP Values (Random Forest)" = "shap_rf",
+                  "SHAP Values (XGBoost)" = "shap_xgb",
+                  "None" = "NoMethod"
+                ),
+                selected = "NoMethod"
+              )
+            )
+          )
+        ),
+        
+        # Main panel for displaying outputs
+        mainPanel(
+          width = 8,
+          div(
+            class = "section-card analysis-options",
+            div(class = "section-heading", div(h2("Output settings"), p("Control the size and organization of the generated result set.")), icon("chart-column")),
+            div(
+              class = "analysis-options-grid",
+              div(
+                class = "form-block genes-count-control",
+                numericInput("genes", "Number of ranked genes", value = 100, min = 2, max = 500, step = 1, width = "100%")
+              ),
+              div(
+                class = "form-block",
+                h3("Generate heatmap"),
+                radioButtons("HeatMap1", label = NULL, choices = list("Yes" = TRUE, "No" = FALSE), selected = FALSE, inline = TRUE)
+              ),
+              div(
+                class = "form-block",
+                h3("Heatmap clustering"),
+                radioButtons(
+                  "clustering",
+                  label = NULL,
+                  choices = c("Between groups" = "cluster_between_groups", "None" = "None_Clustering"),
+                  selected = "None_Clustering",
+                  inline = TRUE
+                )
+              ),
+              div(
+                class = "form-block",
+                h3("Heatmap labels"),
+                radioButtons(
+                  "Split",
+                  label = NULL,
+                  choices = c("Predicted cell type" = "CellType", "Uploaded state" = "labels"),
+                  selected = "CellType",
+                  inline = TRUE
+                )
+              )
+            ),
+            div(class = "inline-note", icon("triangle-exclamation"), span("Organism and gene ID settings from the upload step are reused here."))
+          ),
+          div(
+            class = "analysis-action-bar",
+            div(
+              h3("Ready to run?"),
+              p(class = "analysis-run-hint is-idle", "The runtime depends on dataset size and selected methods."),
+              p(class = "analysis-run-hint is-running", "Analysis in progress. Press Stop analysis to discard this run."),
+              p(class = "analysis-run-hint is-stopping", "Stopping. The current step has to finish before the run is discarded.")
+            ),
+            div(
+              class = "analysis-actions",
+              selectInput(
+                "downloadDpi", NULL,
+                choices = c("300 dpi" = "300", "600 dpi" = "600"),
+                selected = "300"
+              ),
+              conditionalPanel(
+                condition = "!output.analysisReady",
+                tags$span(class = "btn btn-secondary disabled", icon("download"), " Download results")
+              ),
+              conditionalPanel(
+                condition = "output.analysisReady",
+                downloadLink(
+                  "downloadData",
+                  tagList(icon("download"), " Download results"),
+                  class = "btn btn-secondary",
+                  title = "Bundles the filtered gene table, expression heatmap and k-NN plot as a .zip"
+                )
+              ),
+              actionButton(
+                "click",
+                tagList(icon("play"), " Run analysis"),
+                class = "btn btn-primary analysis-run-btn",
+                `aria-label` = "Run the gene selection analysis"
+              ),
+              actionButton(
+                "stopAnalysis",
+                tagList(icon("stop"), " Stop analysis"),
+                class = "btn btn-danger analysis-stop-btn",
+                `aria-label` = "Stop the running gene selection analysis"
+              )
+            )
+          ),
+          div(class = "analysis-status", tableOutput("text")),
+          conditionalPanel(
+            condition = "!output.analysisReady",
+            div(
+              class = "empty-state analysis-empty-state",
+              div(class = "empty-state-icon", icon("flask")),
+              h3("Results will appear after analysis"),
+              p("Select a method, review the output settings and run the analysis to generate ranked biomarkers, validation metrics and optional heatmaps.")
+            )
+          ),
+          conditionalPanel(
+            condition = "output.analysisReady",
+            div(
+              class = "analysis-results",
+              div(
+                class = "results-grid biomarkers-grid",
+                div(
+                  class = "result-card result-card-wide",
+                  div(class = "result-card-heading", div(h2("Ranked biomarkers"), p("Genes ordered by their combined selection score.")), icon("ranking-star")),
+                  girafeOutput("TheBarPlot", height = "460px")
+                ),
+                div(
+                  class = "result-card result-list-card",
+                  div(class = "result-card-heading", div(h2("Gene list"), p("Selected potential biomarkers.")), icon("list-ol")),
+                  DT::dataTableOutput("GenesList")
+                )
+              ),
+              div(
+                class = "result-card result-card-full",
+                div(class = "result-card-heading", div(h2("k-NN classification"), p("Predictive performance using only the selected genes.")), icon("bullseye")),
+                plotOutput("KnnClassifier", height = "460px")
+              ),
+              conditionalPanel(
+                condition = "input.HeatMap1 == 'TRUE'",
+                div(
+                  class = "results-grid heatmap-grid",
+                  div(
+                    class = "result-card result-card-wide",
+                    div(
+                      class = "result-card-heading",
+                      div(h2("Expression heatmap"), p("Selected-gene expression across cells and groups.")),
+                      div(
+                        class = "result-card-heading-actions",
+                        icon("grip"),
+                        tags$button(
+                          type = "button",
+                          class = "fullscreen-btn",
+                          `data-target` = "HeatMap",
+                          `aria-label` = "View the expression heatmap full screen",
+                          title = "View full screen",
+                          icon("up-right-and-down-left-from-center")
+                        )
+                      )
+                    ),
+                    plotOutput("HeatMap", height = "520px")
+                  ),
+                  div(
+                    class = "result-card result-list-card",
+                    div(class = "result-card-heading", div(h2("Heatmap genes"), p("Genes included in the visualization.")), icon("list")),
+                    DT::dataTableOutput("HeatmapList")
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
     ),
     
+    # Results workspace
+    navbarMenu(
+      title = "Explore Results",
+      icon = icon("chart-pie"),
+      tabPanel(
+      title = "Enrichment",
+      value = "enrichment",
+      div(
+        class = "page-header",
+        div(
+          div(class = "eyebrow", "Step 4 of 4 - Biological interpretation"),
+          h1("Enrichment analysis"),
+          p("Test top-ranked biomarkers against pathway, ontology and disease-drug libraries from Enrichr.")
+        ),
+        dropMenu(
+          dropdownButton("About enrichment", status = "info", size = "sm", icon = icon("circle-info")),
+          h3("How enrichment works"),
+          p("Choose how many of the highest-scoring genes to test, then select one or more knowledge-base categories."),
+          p("Enable all ontology terms for a broader scan, or choose focused libraries for a more targeted interpretation."),
+          placement = "bottom-end",
+          arrow = TRUE,
+          theme = "material",
+          maxWidth = 560
+        )
+      ),
+      div(
+        class = "section-card enrichment-controls",
+        div(class = "section-heading", div(h2("Analysis setup"), p("Select the gene set size and knowledge bases.")), icon("book-medical")),
+        div(
+          class = "enrichment-grid",
+          numericInput("genes1", "Top-ranked genes", value = 50, min = 10, max = 9000, step = 10, width = "100%"),
+          div(
+            class = "form-block",
+            h3("Use all ontology terms"),
+            radioButtons("all", label = NULL, choices = list("Yes" = TRUE, "No" = FALSE), selected = FALSE, inline = TRUE)
+          ),
+          selectInput(
+            "BP",
+            "Biological pathway",
+            c(
+              "Select a library" = "-",
+              "KEGG 2021 Human" = "KEGG_2021_Human",
+              "WikiPathway 2021 Human" = "WikiPathway_2021_Human",
+              "BioPlanet 2019" = "BioPlanet_2019",
+              "BioCarta 2016" = "BioCarta_2016",
+              "MSigDB Hallmark 2020" = "MSigDB_Hallmark_2020",
+              "Reactome 2016" = "Reactome_2016"
+            )
+          ),
+          selectInput(
+            "BO",
+            "Biological ontology",
+            c(
+              "Select a library" = "-",
+              "GO Biological Process 2021" = "GO_Biological_Process_2021",
+              "GO Molecular Function 2021" = "GO_Molecular_Function_2021",
+              "GO Cellular Component 2021" = "GO_Cellular_Component_2021",
+              "MGI Mammalian Phenotype Level 4 2021" = "MGI_Mammalian_Phenotype_Level_4_2021",
+              "Human Phenotype Ontology" = "Human_Phenotype_Ontology",
+              "Jensen DISEASES" = "Jensen_DISEASES"
+            )
+          ),
+          selectInput(
+            "DD",
+            "Diseases and drugs",
+            c(
+              "Select a library" = "-",
+              "DisGeNET" = "DisGeNET",
+              "DSigDB" = "DSigDB",
+              "DrugMatrix" = "DrugMatrix",
+              "OMIM Disease" = "OMIM_Disease",
+              "HDSigDB Human 2021" = "HDSigDB_Human_2021",
+              "COVID-19 Related Gene Sets 2021" = "COVID-19_Related_Gene_Sets_2021"
+            )
+          )
+        ),
+        div(
+          class = "section-action-row",
+          div(class = "inline-note", icon("circle-info"), span("Enrichment uses the ranking produced in Run Analysis.")),
+          actionButton("click1", tagList(icon("play"), " Run enrichment"), class = "btn btn-primary", `aria-label` = "Run the enrichment analysis")
+        )
+      ),
+      conditionalPanel(
+        condition = "!input.click1",
+        div(
+          class = "empty-state results-empty-state",
+          div(class = "empty-state-icon", icon("chart-bar")),
+          h3("No enrichment results yet"),
+          p("Run gene selection first, choose at least one knowledge base, and start enrichment to populate this workspace."),
+          tags$a(href = "#", class = "btn btn-secondary sc-nav-link", `data-nav-target` = "analysis", "Go to Run Analysis")
+        )
+      ),
+      conditionalPanel(
+        condition = "input.click1 > 0",
+        div(
+          class = "result-card result-card-full enrichment-results",
+          div(
+            class = "result-card-heading",
+            div(h2("Enriched terms"), p("Significant pathway and ontology associations for the selected genes.")),
+            div(
+              class = "result-card-heading-actions",
+              icon("chart-bar"),
+              tags$button(
+                type = "button",
+                class = "fullscreen-btn",
+                `data-target` = "BioBarPlot",
+                `aria-label` = "View the enriched terms chart full screen",
+                title = "View full screen",
+                icon("up-right-and-down-left-from-center")
+              ),
+              selectInput(
+                "enrichmentDpi", NULL,
+                choices = c("300 dpi" = "300", "600 dpi" = "600"),
+                selected = "300"
+              ),
+              downloadLink(
+                "downloadEnrichment",
+                tagList(icon("download"), " Download"),
+                class = "btn btn-secondary btn-sm"
+              )
+            )
+          ),
+          plotOutput("BioBarPlot", width = "100%", height = "680px"),
+          tableOutput("Enrichment")
+        )
+      )
+    ),
     
+    # KEGG Maps Tab
+    tabPanel(
+      title = "KEGG Maps",
+      value = "kegg",
+      div(
+        class = "page-header",
+        div(
+          div(class = "eyebrow", "Step 4 of 4 - Pathway context"),
+          h1("KEGG pathway maps"),
+          p("Map selected biomarkers onto a KEGG pathway to inspect their biological context and relationships.")
+        ),
+        dropMenu(
+          dropdownButton("How it works", status = "info", size = "sm", icon = icon("circle-info")),
+          h3("Visualizing a KEGG pathway"),
+          p("Find a pathway in the reference table, copy its five-digit identifier, and enter it in the Pathway ID field."),
+          p("The organism selected during upload determines whether human or mouse KEGG maps are used."),
+          placement = "bottom-end",
+          arrow = TRUE,
+          theme = "material",
+          maxWidth = 520
+        )
+      ),
+      sidebarLayout(
+        sidebarPanel(
+          width = 4,
+          div(
+            class = "section-card kegg-controls",
+            div(class = "section-heading", div(h2("Pathway selection"), p("Enter a KEGG identifier from the table.")), icon("map")),
+            textInput("inText", "Pathway ID", placeholder = "e.g. 04110"),
+            div(class = "inline-note", icon("dna"), span("Uses the organism selected during data upload.")),
+            actionButton(
+              "click2",
+              tagList(icon("eye"), " Visualize pathway"),
+              class = "btn btn-primary btn-block",
+              `aria-label` = "Visualize KEGG pathway"
+            )
+          )
+        ),
+        mainPanel(
+          width = 8,
+          div(
+            class = "result-card kegg-reference-card",
+            div(class = "result-card-heading", div(h2("KEGG pathway reference"), p("Search by pathway name or copy a pathway identifier.")), icon("table-list")),
+            dataTableOutput("KEGG")
+          ),
+          conditionalPanel(
+            condition = "!input.click2",
+            div(
+              class = "empty-state kegg-empty-state",
+              div(class = "empty-state-icon", icon("map-location-dot")),
+              h3("Choose a pathway to create a map"),
+              p("Search the reference table, enter its Pathway ID and select Visualize pathway.")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.click2 > 0",
+            div(
+              class = "result-card kegg-map-card",
+              div(
+                class = "result-card-heading",
+                div(h2("Pathway visualization"), p("Selected genes highlighted on the KEGG pathway map.")),
+                div(
+                  class = "result-card-heading-actions",
+                  icon("route"),
+                  tags$button(
+                    type = "button",
+                    class = "fullscreen-btn",
+                    `data-target` = "KEGGmap",
+                    `aria-label` = "View the KEGG pathway map full screen",
+                    title = "View full screen",
+                    icon("up-right-and-down-left-from-center")
+                  ),
+                  downloadLink(
+                    "downloadKeggMap",
+                    tagList(icon("download"), " Download"),
+                    class = "btn btn-secondary btn-sm",
+                    title = "Downloads the original KEGG pathway image, at its full native resolution"
+                  )
+                )
+              ),
+              plotOutput("KEGGmap", width = "100%", height = "680px")
+            )
+          )
+        )
+      )
+    ),
+    
+    # Graph Analysis Tab
+    tabPanel(
+      title = "Networks",
+      value = "graphs",
+      div(
+        class = "page-header",
+        div(
+          div(class = "eyebrow", "Step 4 of 4 - Network interpretation"),
+          h1("Gene interaction networks"),
+          p("Generate protein-protein interaction and expression-similarity networks from the highest-ranked genes.")
+        ),
+        dropMenu(
+          dropdownButton("About networks", status = "info", size = "sm", icon = icon("circle-info")),
+          h3("Network options"),
+          p("PPI analysis uses STRINGdb combined scores. Higher thresholds retain stronger evidence-backed interactions."),
+          p("The similarity network links genes whose expression profiles exceed the selected absolute Pearson correlation."),
+          placement = "bottom-end",
+          arrow = TRUE,
+          theme = "material",
+          maxWidth = 560
+        )
+      ),
+      sidebarLayout(
+        sidebarPanel(
+          width = 4,
+          div(
+            class = "section-card network-controls",
+            div(class = "section-heading", div(h2("Network setup"), p("Choose the scope and network types.")), icon("share-nodes")),
+            numericInput("Genes", "Top-ranked genes", value = 50, min = 2, max = 3000, step = 10, width = "100%"),
+            div(
+              class = "network-option",
+              div(h3("Protein-protein interactions"), p("Connect genes using STRINGdb evidence scores.")),
+              radioButtons("PPInetwork1", label = NULL, choices = list("Generate" = TRUE, "Skip" = FALSE), selected = FALSE, inline = TRUE),
+              numericInput("Score_Threshold_PPI", "Minimum STRING score", value = 400, min = 50, max = 1000, step = 10, width = "100%")
+            ),
+            div(
+              class = "network-option",
+              div(h3("Expression similarity"), p("Connect genes with similar expression profiles.")),
+              radioButtons("graph1", label = NULL, choices = list("Generate" = TRUE, "Skip" = FALSE), selected = FALSE, inline = TRUE),
+              numericInput("Pearson_correlation", "Minimum absolute Pearson correlation", value = 0.5, min = 0.1, max = 0.99, step = 0.1, width = "100%")
+            ),
+            actionButton(
+              "run_button1",
+              tagList(icon("share-nodes"), " Generate networks"),
+              class = "btn btn-primary btn-block",
+              `aria-label` = "Generate PPI and similarity graphs"
+            )
+          )
+        ),
+        mainPanel(
+          width = 8,
+          conditionalPanel(
+            condition = "!input.run_button1",
+            div(
+              class = "empty-state network-empty-state",
+              div(class = "empty-state-icon", icon("circle-nodes")),
+              h3("Configure a network to begin"),
+              p("Select at least one network type, adjust its threshold and generate the visualization.")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.run_button1 > 0 && input.PPInetwork1 == 'FALSE' && input.graph1 == 'FALSE'",
+            div(class = "alert alert-warning", icon("triangle-exclamation"), strong(" Select at least one network type before generating results."))
+          ),
+          conditionalPanel(
+            condition = "input.run_button1 > 0 && input.PPInetwork1 == 'TRUE'",
+            div(
+              class = "result-card network-result-card",
+              div(class = "result-card-heading", div(h2("Protein-protein interaction network"), p("STRINGdb interactions above the selected score threshold.")), icon("diagram-project")),
+              plotOutput("PPInetwork", width = "100%", height = "660px")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.run_button1 > 0 && input.graph1 == 'TRUE'",
+            div(
+              class = "result-card network-result-card",
+              div(class = "result-card-heading", div(h2("Expression-similarity network"), p("Interactive gene modules based on expression correlation.")), icon("circle-nodes")),
+              visNetworkOutput("graph", width = "100%", height = "660px")
+            )
+          )
+        )
+      )
+    )
+  )
   )

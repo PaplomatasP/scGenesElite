@@ -1,0 +1,22 @@
+name: Application and case-study checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install test dependencies
+        run: Rscript -e 'install.packages(c("shiny", "caret", "ggplot2", "gridExtra", "foreach", "doParallel", "zip", "png"))'
+      - name: Parse application and check compatibility copies
+        run: Rscript tools/check_app.R
+      - name: Run regression scripts
+        run: Rscript tools/run_tests.R
+      - name: Check recorded case-study results
+        run: Rscript case-studies/ck-p25/verify_results.R
