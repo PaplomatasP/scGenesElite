@@ -13,7 +13,7 @@ jobs:
         with:
           use-public-rspm: true
       - name: Install test dependencies
-        run: Rscript -e 'install.packages(c("shiny", "caret", "ggplot2", "gridExtra", "foreach", "doParallel", "zip", "png"))'
+        run: Rscript -e 'install.packages(c("shiny", "DT", "caret", "ggplot2", "gridExtra", "foreach", "doParallel", "zip", "png"))'
       - name: Parse application and check compatibility copies
         run: Rscript tools/check_app.R
       - name: Run regression scripts

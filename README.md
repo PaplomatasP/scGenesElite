@@ -53,7 +53,7 @@ Rscript tools/run_tests.R
 Rscript case-studies/ck-p25/verify_results.R
 ```
 
-The application regression checks require `shiny`, `caret`, `ggplot2`, `gridExtra`, `foreach`, `doParallel`, `zip`, `png` and their dependencies. They cover CSV/RDS validation, preview state, cached analysis errors, Run/Stop state, selected-gene classification and download settings. They do not exercise every biological method or external service. GitHub Actions runs these checks on pushes and pull requests.
+The application regression checks require `shiny`, `DT`, `caret`, `ggplot2`, `gridExtra`, `foreach`, `doParallel`, `zip`, `png` and their dependencies. They cover CSV/RDS validation, preview state, cached analysis errors, Run/Stop state, selected-gene classification and download settings. They do not exercise every biological method or external service. GitHub Actions runs these checks on pushes and pull requests.
 
 ## Docker
 
