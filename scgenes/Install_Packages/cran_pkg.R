@@ -8,7 +8,7 @@ InstallCran <- function() {
     "tidyverse", "readr", "shinyWidgets", "shinydashboard", "DT",
     "ggiraph", "visNetwork", "png", "shinyjs", "votesys",
     "shinycustomloader", "igraph", "BiocManager", "remotes", "pkgbuild", "caret",
-    "randomForest", "xgboost", "C50", "glmnet", "doParallel", "foreach"
+    "randomForest", "xgboost", "C50", "glmnet", "doParallel", "foreach", "zip"
   )
 
   missing <- cran_packages[

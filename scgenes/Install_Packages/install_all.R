@@ -31,7 +31,8 @@ required_packages <- c(
   "BiocManager", "fastAdaboost", "votesys", "M3Drop", "ComplexHeatmap",
   "igraph", "visNetwork", "SingleR", "shinyjs", "STRINGdb", "fastshap",
   "xgboost", "randomForest", "SingleCellExperiment", "SummarizedExperiment",
-  "MAST", "DESeq2", "BPSC", "scPNMF", "SelfE", "org.Hs.eg.db"
+  "MAST", "DESeq2", "BPSC", "scPNMF", "SelfE", "org.Hs.eg.db",
+  "caret", "zip", "foreach", "doParallel"
 )
 
 failed <- required_packages[
