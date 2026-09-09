@@ -27,7 +27,7 @@ Install the test dependencies in R:
 
 ```r
 install.packages(c(
-  "shiny", "DT", "caret", "ggplot2", "gridExtra",
+  "shiny", "DT", "caret", "ggplot2", "gridExtra", "ggiraph",
   "foreach", "doParallel", "zip", "png"
 ))
 ```
