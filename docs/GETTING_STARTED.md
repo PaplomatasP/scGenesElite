@@ -7,8 +7,8 @@
 Clone the repository and enter the application directory:
 
 ```sh
-git clone https://github.com/PaplomatasP/scGenesElite.git
-cd scGenesElite/scgenes
+git clone https://github.com/PaplomatasP/scGenesFinder.git
+cd scGenesFinder/scgenes
 Rscript Install_Packages/install_all.R
 ```
 
@@ -47,7 +47,7 @@ For a recorded biological example, download [input_ExampleData.csv](../case-stud
 3. Run selection and inspect the ranked genes. Use the gene-count control to change the displayed subset.
 4. Export the selected data and available plots. Download bundles support 300 or 600 dpi settings.
 
-The [scripted case study](../case-studies/ck-p25/README.md#reproduce-the-analysis) records the exact seed, function snapshot and package environment for reproduction. Its two-panel figure was prepared from saved results and has a dedicated script; it is not an unmodified application screenshot.
+The [scripted case study](../case-studies/ck-p25/README.md#reproduce-the-analysis) records the exact seed, function snapshot and package environment for reproduction. Its current four-panel figure uses the application's Publication figures helpers. Open **Publication figures**, select 20 genes, use log2(x + 1), upload the case-study `publication_metadata.csv`, and select Il6ra, Sall1 and Lcp1. The classifier seed is 20260908. See the [publication export guide](PUBLICATION_FIGURES.md) for downloads and interpretation.
 
 ## Interpreting results
 
@@ -70,4 +70,4 @@ The Stop control is processed when the active R computation returns. It discards
 | A package cannot load | Restart R. For a repeated corrupt lazy-load database error, reinstall the package named in the console. |
 | Enrichment or a reference query fails | Check network access, the selected organism and the external service response. |
 
-For a reproducible problem, [open a bug report](https://github.com/PaplomatasP/scGenesElite/issues/new?template=bug_report.yml) with the method, settings, error text and `sessionInfo()`.
+For a reproducible problem, [open a bug report](https://github.com/PaplomatasP/scGenesFinder/issues/new?template=bug_report.yml) with the method, settings, error text and `sessionInfo()`.

@@ -40,7 +40,7 @@ Rscript tools/run_tests.R
 Rscript case-studies/ck-p25/verify_results.R
 ```
 
-The six application scripts cover input validation, upload preview, analysis caching and errors, Run/Stop state, selected-gene k-NN classification and download settings. They use small fixtures or substitutes where needed. They do not exercise every biological method or live annotation service.
+The eight application scripts cover input validation, upload preview, analysis caching and errors, Run/Stop state, selected-gene k-NN classification and download settings. They use small fixtures or substitutes where needed. They do not exercise every biological method or live annotation service.
 
 The case-study check compares saved rankings with serialized outputs, verifies plotted values and recomputes all six KEGG analyses. The separate provenance script matches the input against the public GEO matrix. Read the [case-study instructions](../case-studies/ck-p25/README.md) before regenerating saved research outputs.
 
