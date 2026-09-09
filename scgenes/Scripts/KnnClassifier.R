@@ -1,11 +1,20 @@
 
 #Create a Knn model , and plot the confusion Matrix
 KnnClassifier = function(data,iG,
-                            Labels
+                            Labels, genes_count = input$genes, seed = NULL,
+                            fit_only = FALSE
                             ) {
 
   Labels <- droplevels(as.factor(Labels))
-  genes <- rownames(head(iG, input$genes))
+  genes <- rownames(head(iG, genes_count))
+  if (!is.null(seed)) {
+    had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    if (had_seed) old_seed <- get(".Random.seed", envir = .GlobalEnv)
+    on.exit(if (had_seed) assign(".Random.seed", old_seed, envir = .GlobalEnv)
+            else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+              rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+    set.seed(seed)
+  }
 
   # `rownames(by_iG) %in% colnames(data)` is as long as the gene list, not as
   # long as the frame, so using it to index columns recycled it: when every
@@ -32,6 +41,9 @@ partitionData <-
   caret::createDataPartition(data$Labels, p = 0.8, list = FALSE)
 trainData <- data[partitionData, , drop = FALSE]
 testData  <- data[-partitionData, , drop = FALSE]
+shiny::validate(shiny::need(nrow(testData) > 0L &&
+  all(table(factor(testData$Labels, levels=levels(Labels))) > 0L),
+  "Each class needs enough cells for a non-empty 20% test split."))
 
 # Never ask for more folds than the smallest class can fill.
 folds <- max(2L, min(5L, min(table(trainData$Labels))))
@@ -61,6 +73,12 @@ pred = predict(model, newdata=testData)
 
 ConfMatrix<-caret::confusionMatrix(data=pred, testData$Labels, mode = "everything")
 
+if (fit_only) return(list(confusionMatrix = ConfMatrix, genes = selected,
+  seed = seed, k = model$bestTune$k, folds = folds,
+  train_cells = rownames(trainData), test_cells = rownames(testData),
+  predictions = data.frame(cell=rownames(testData), observed=testData$Labels,
+                           predicted=pred)))
+
 Confusion_Matrix=ConfMatrixPlot(ConfMatrix)
 # Carried along so the run can be inspected without re-reading the plot.
 attr(Confusion_Matrix, "confusionMatrix") <- ConfMatrix
@@ -69,45 +87,24 @@ return(Confusion_Matrix)
 
 }
 
-
-ConfMatrixPlot=function(ConfMatrix){
-  
-  cm_d <- as.data.frame(ConfMatrix$table)
-
-  byClass <- ConfMatrix[["byClass"]]
-  if (is.matrix(byClass)) {
-    # Three or more classes: caret returns one row per class, so keep the
-    # classes as columns instead of indexing the matrix as a flat vector.
-    metrics <- as.data.frame(round(t(byClass[, -c(1, 2), drop = FALSE]), 2))
-  } else {
-    metrics <- data.frame(round(byClass[-c(1, 2)], 2))
-    colnames(metrics) <- "k-NN Metrics"
-  }
-
-  cm_p <- as.data.frame(prop.table(ConfMatrix$table))
-  cm_d$Perc <- round(cm_p$Freq*100,2)
-  cm_st_p <-  gridExtra::tableGrob(metrics)
-
-  # Colour by whether the cell sits on the diagonal. The old gradient ran on the
-  # count alone, which painted a large pile of misclassifications green and a
-  # small number of correct calls dark red.
-  cm_d$Outcome <- factor(
-    ifelse(cm_d$Prediction == cm_d$Reference, "Correct", "Misclassified"),
-    levels = c("Correct", "Misclassified")
-  )
-
-  cm_d_p <- ggplot2::ggplot(data = cm_d, aes(x = Prediction  , y =  Reference))+
-    ggplot2::geom_tile(aes(fill = Outcome, alpha = Perc), colour = "white") +
-    ggplot2::scale_fill_manual(values = c(Correct = "#0fbe0e",
-                                          Misclassified = "#900700")) +
-    ggplot2::scale_alpha_continuous(range = c(0.15, 1), limits = c(0, 100)) +
-    # Put the diagonal top-left, the way the printed caret table reads.
-    ggplot2::scale_y_discrete(limits = rev(levels(cm_d$Reference))) +
-    ggplot2::geom_text(aes(label = paste(Freq, "\n", Perc,"%")), color = 'black', size = 7)+  # Adjusted size and added newline
-    ggplot2::theme_bw() +
-    ggplot2::theme(plot.title = element_text(vjust = 12)) +
-    ggplot2::guides(fill="none", alpha="none")
-  gridExtra::grid.arrange(cm_d_p, cm_st_p,nrow = 1, ncol = 2, 
-                          top= grid::textGrob("Confusion Matrix",x = 0.5, y = 0.6, just = "center", gp=grid::gpar(fontsize=21,font=1)))
-  
+ConfMatrixPlot <- function(ConfMatrix, title = "D  Within-dataset classification", subtitle = NULL) {
+  d <- as.data.frame(ConfMatrix$table)
+  totals <- tapply(d$Freq, d$Reference, sum)
+  d$fraction <- d$Freq / totals[as.character(d$Reference)]
+  d$label <- sprintf("%d cells\n%.1f%%", d$Freq, 100*d$fraction)
+  if (is.null(subtitle)) subtitle <- sprintf("k-NN | accuracy %.1f%%", 100*ConfMatrix$overall['Accuracy'])
+  ggplot2::ggplot(d, ggplot2::aes(Prediction, Reference, fill=fraction)) +
+    ggplot2::geom_tile(colour="white", linewidth=1) +
+    ggplot2::geom_text(ggplot2::aes(label=label), size=3, colour="#18243B") +
+    ggplot2::scale_fill_gradient(low="#F2F5FA", high="#8DA6D4", limits=c(0,1), guide="none") +
+    ggplot2::scale_x_discrete(expand=c(0,0)) +
+    ggplot2::scale_y_discrete(limits=rev(levels(d$Reference)), expand=c(0,0)) +
+    ggplot2::labs(title=title, subtitle=subtitle, x="Predicted label", y="Observed label",
+      caption=paste0(sum(d$Freq), " held-out cells; percentages within observed class\n",
+                     "Cell-level split; independent samples were not held out")) +
+    ggplot2::theme_minimal(base_size=8) +
+    ggplot2::theme(text=ggplot2::element_text(colour="#18243B"),
+      panel.grid=ggplot2::element_blank(),plot.title=ggplot2::element_text(size=10,face="bold"),
+      plot.subtitle=ggplot2::element_text(size=7,colour="#526178",margin=ggplot2::margin(b=8)),
+      plot.caption=ggplot2::element_text(size=7,hjust=0),plot.margin=ggplot2::margin(8,12,8,8))
 }

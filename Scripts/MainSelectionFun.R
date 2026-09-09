@@ -281,15 +281,7 @@ MethodData = function() {
                      if  (exists("iG") ) {
                        
                    output$GenesList = DT::renderDataTable({
-                     s1 = lapply(input$genes,
-                                 function(i)
-                                   iG[1:i,])
-                     s1 = as.data.frame(s1)
-                     rownames(s1) = make.names(row.names(iG)[1:nrow(s1)], unique = TRUE)
-
-                     colnames(s1) = paste("# of Genes which operate as Biomarkers: ", nrow(iG))
-                     s1[, 1] = rownames(s1)
-
+                     s1 <- data.frame(Gene = rownames(head(iG, input$genes)))
                      DT::datatable(s1, rownames = FALSE,
                        options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
                        class = 'cell-border stripe')
@@ -304,90 +296,8 @@ MethodData = function() {
                    })
                    
                    
-                   tryCatch({
-                     if (exists("FilterData") ) {
-                       
-                       iG <- FilterData$ig
-                       NewData = FilterData$newdata
-                     
-                       
-                   output$HeatmapList = DT::renderDataTable({
-                     if (input$HeatMap1 == TRUE) {
-                       S <- complexHeatMapFun(NewData,iG,Plot=FALSE)
-                       DT::datatable(S, rownames = FALSE,
-                         options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
-                         class = 'cell-border stripe')
-                     }
-                   })
-                   
-                  
-                   output$KnnClassifier = renderPlot({
-                     KnnClassifier(data = NewData,iG, Labels = NewData[, ncol(NewData)])
-                     
-                   })
-                   output$HeatMap <-
-                     renderPlot(execOnResize = FALSE, {
-                       if (input$HeatMap1 == TRUE) {
-                         complexHeatMapFun(NewData,iG,Plot=TRUE)
-                       }
-                       
-                     })
+                   # Plot rendering and exports are registered once in PublicationFigures.R.
 
-                   }else {
-                       showModal(modalDialog(
-                         title = "Message",
-                         "The analysis could not be executed; something is wrong with your selection. Make sure that the data you uploaded is in the correct format and that only one methoth from the Gene Selection field is selected; only in the Ensemble Aproach tab more can be select."
-                       ))
-                     }
-                   }, error = function(e) {
-                     showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
-                   })
-                   
-                   
-                   
-                   output$downloadData <- downloadHandler(
-                     filename = function() {
-                       paste0("scGenesFinder-results-", Sys.Date(), ".zip")
-                     },
-                     content = function(file) {
-                       dpi <- suppressWarnings(as.numeric(input$downloadDpi))
-                       if (is.na(dpi) || !dpi %in% c(300, 600)) dpi <- 300
-
-                       export_dir <- tempfile("scgenes-download-")
-                       dir.create(export_dir)
-                       on.exit(unlink(export_dir, recursive = TRUE, force = TRUE), add = TRUE)
-
-                       # One PNG device per plot, closed immediately after that plot - so an
-                       # error in one plot cannot leave a device open or corrupt another's file.
-                       render_png <- function(png_name, draw) {
-                         path <- file.path(export_dir, png_name)
-                         grDevices::png(path, width = 11, height = 7, units = "in", res = dpi)
-                         tryCatch({
-                           draw()
-                           TRUE
-                         }, error = function(e) {
-                           showNotification(paste0(png_name, " was skipped: ", conditionMessage(e)), type = "warning")
-                           FALSE
-                         }, finally = grDevices::dev.off())
-                       }
-
-                       parts <- "FilterData.csv"
-                       write.csv(NewData, file.path(export_dir, "FilterData.csv"))
-
-                       if (isTRUE(input$HeatMap1) &&
-                           render_png("ExpressionHeatmap.png", function() complexHeatMapFun(NewData, iG, Plot = TRUE))) {
-                         parts <- c(parts, "ExpressionHeatmap.png")
-                       }
-
-                       if (render_png("KnnClassification.png",
-                                      function() KnnClassifier(data = NewData, iG, Labels = NewData[, ncol(NewData)]))) {
-                         parts <- c(parts, "KnnClassification.png")
-                       }
-
-                       zip::zip(file, files = parts, root = export_dir)
-                     },
-                     contentType = "application/zip"
-                   )
                    {
                      incProgress(10 / 10)
                      Sys.sleep(0.45)
@@ -669,16 +579,8 @@ MethodData = function() {
         if  (exists("iG") ) {
           
           output$GenesList = DT::renderDataTable({
-            s1 = lapply(input$genes,
-                        function(i)
-                          iG[1:i,])
-            s1 = as.data.frame(s1)
-            rownames(s1) = make.names(row.names(iG)[1:nrow(s1)], unique = TRUE)
-
-            colnames(s1) = paste("# of Genes which operate as Biomarkers: ", nrow(iG))
-            s1[, 1] = rownames(s1)
-
-            DT::datatable(s1, rownames = FALSE,
+            s1 <- data.frame(Gene = rownames(head(iG, input$genes)))
+                     DT::datatable(s1, rownames = FALSE,
               options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
               class = 'cell-border stripe')
           })} else {
@@ -692,85 +594,8 @@ MethodData = function() {
       })
       
       
-      tryCatch({
-        if (exists("FilterData") ) {
-          iG <- FilterData$ig
-          NewData = FilterData$newdata
-          
-          output$HeatmapList = DT::renderDataTable({
-            if (input$HeatMap1 == TRUE) {
-              S <- complexHeatMapFun(NewData,iG,Plot=FALSE)
-              DT::datatable(S, rownames = FALSE,
-                options = list(pageLength = 20, scrollY = "400px", dom = 'ftip'),
-                class = 'cell-border stripe')
-            }
-          })
-          
-          output$KnnClassifier = renderPlot({
-            KnnClassifier(data = NewData,iG, Labels = NewData[, ncol(NewData)])
-            
-          })
-          output$HeatMap <-
-            renderPlot(execOnResize = FALSE, {
-              if (input$HeatMap1 == TRUE) {
-                complexHeatMapFun(NewData,iG,Plot=TRUE)
-                
-              }
-            })
+      # Plot rendering and exports are registered once in PublicationFigures.R.
 
-        }else {
-          showModal(modalDialog(
-            title = "Message",
-            "The analysis could not be executed; something is wrong with your selection. Make sure that the data you uploaded is in the correct format and that only one methoth from the Gene Selection field is selected; only in the Ensemble Aproach tab more can be select."
-          ))
-        }
-      }, error = function(e) {
-        showNotification(paste("Analysis error:", e$message), type = "error", duration = 15)
-      })
-      
-      output$downloadData <- downloadHandler(
-        filename = function() {
-          paste0("scGenesFinder-results-", Sys.Date(), ".zip")
-        },
-        content = function(file) {
-          dpi <- suppressWarnings(as.numeric(input$downloadDpi))
-          if (is.na(dpi) || !dpi %in% c(300, 600)) dpi <- 300
-
-          export_dir <- tempfile("scgenes-download-")
-          dir.create(export_dir)
-          on.exit(unlink(export_dir, recursive = TRUE, force = TRUE), add = TRUE)
-
-          # One PNG device per plot, closed immediately after that plot - so an
-          # error in one plot cannot leave a device open or corrupt another's file.
-          render_png <- function(png_name, draw) {
-            path <- file.path(export_dir, png_name)
-            grDevices::png(path, width = 11, height = 7, units = "in", res = dpi)
-            tryCatch({
-              draw()
-              TRUE
-            }, error = function(e) {
-              showNotification(paste0(png_name, " was skipped: ", conditionMessage(e)), type = "warning")
-              FALSE
-            }, finally = grDevices::dev.off())
-          }
-
-          parts <- "FilterData.csv"
-          write.csv(NewData, file.path(export_dir, "FilterData.csv"))
-
-          if (isTRUE(input$HeatMap1) &&
-              render_png("ExpressionHeatmap.png", function() complexHeatMapFun(NewData, iG, Plot = TRUE))) {
-            parts <- c(parts, "ExpressionHeatmap.png")
-          }
-
-          if (render_png("KnnClassification.png",
-                         function() KnnClassifier(data = NewData, iG, Labels = NewData[, ncol(NewData)]))) {
-            parts <- c(parts, "KnnClassification.png")
-          }
-
-          zip::zip(file, files = parts, root = export_dir)
-        },
-        contentType = "application/zip"
-      )
       {
         incProgress(10 / 10)
         Sys.sleep(0.30)
@@ -800,6 +625,15 @@ MethodData = function() {
   }, error = function(e) {
    
   })
+  if (is.list(FilterData) && !is.null(FilterData$ig)) {
+    original <- if (has_csv) CSV_file else RDS_file
+    mapped <- if (has_csv) CSV_file1 else RDS_file1
+    methods <- unlist(list(input$VariableM,input$P_method,input$ML_Method,input$SHAP_Method))
+    methods <- methods[!methods %in% c("Empty","NoMethod","")]
+    FilterData$plot_context <- list(input_genes=ncol(original)-1L,
+      mapped_genes=ncol(mapped)-1L,expression=mapped,
+      method=if(length(methods)) paste(methods,collapse=" / ") else "Ensemble")
+  }
   return(FilterData)
   
 }

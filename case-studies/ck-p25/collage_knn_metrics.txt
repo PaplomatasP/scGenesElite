@@ -1,0 +1,29 @@
+Confusion Matrix and Statistics
+
+          Reference
+Prediction CK CKp25
+     CK    21    11
+     CKp25 17    27
+
+               Accuracy : 0.6316
+                 95% CI : (0.5131, 0.7394)
+    No Information Rate : 0.5
+    P-Value [Acc > NIR] : 0.01431
+
+                  Kappa : 0.2632
+
+ Mcnemar's Test P-Value : 0.34470
+
+            Sensitivity : 0.5526
+            Specificity : 0.7105
+         Pos Pred Value : 0.6562
+         Neg Pred Value : 0.6136
+              Precision : 0.6562
+                 Recall : 0.5526
+                     F1 : 0.6000
+             Prevalence : 0.5000
+         Detection Rate : 0.2763
+   Detection Prevalence : 0.4211
+      Balanced Accuracy : 0.6316
+
+       'Positive' Class : CK

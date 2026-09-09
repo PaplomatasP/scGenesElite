@@ -22,13 +22,15 @@ server <- function(input, output, session) {
   source('./Scripts/EnsemleMethod.R', local = TRUE)
   source('./Scripts/HeatmapGraph.R', local = TRUE)
   source('./Scripts/KnnClassifier.R', local = TRUE)
+  source('./Scripts/PublicationFigures.R', local = TRUE)
   source('./Scripts/MainSelectionFun.R', local = TRUE)
   #Load the KEGG pahtway dataframe
   Hpaths = readRDS("./data/KEGGpaths.rds")
 
   source("Scripts/AnalysisRunner.R", local = TRUE)
   analysisResult <- create_analysis_runner(input, MethodData)
-  register_run_controls(input, output, session, analysisResult)
+  runState <- register_run_controls(input, output, session, analysisResult)
+  register_publication_results(input, output, session, analysisResult, runState)
   
   # Download the example data from github repository
   output$Example <- downloadHandler(

@@ -39,7 +39,17 @@ The run used R 4.6.1, SCMarker 2.0 and EnsDb.Mmusculus.v79. See `sessionInfo.txt
 
 SCMarker settings were `geneK=10`, `cellK=10`, `cutoff=2`, `width=1`, followed by marker selection with `k=150` and `n=20`. The script sets seed 20260906 before running the all-cell analysis and then the week-2 analysis. Cell labels are retained as metadata and are not used by SCMarker for selection.
 
-## Recorded results
+## Current publication figure
+
+![Gene-selection counts, group-mean expression, gene distributions and within-dataset classification](figures/scGenesFinder_results_collage_600dpi.png)
+
+The four panels use the same plotting and export functions as the application's **Publication figures** workspace. SCMarker returned 302 genes from 1,860 mapped inputs. Expression panels show the leading 20 genes and the distributions of Il6ra, Sall1 and Lcp1. The k-NN evaluation correctly classifies 48 of 76 held-out cells (63.2%). Selection precedes the cell-level split; cells from the same source sample may occur in both partitions. This does not measure prediction in independent animals.
+
+Download the [vector PDF](figures/scGenesFinder_results_collage.pdf), [600 dpi PNG](figures/scGenesFinder_results_collage_600dpi.png), or [complete publication bundle](scGenesFinder_app_publication_bundle.zip). The bundle includes individual panels, plotted values, predictions, split identifiers and methods notes. Use [publication_metadata.csv](publication_metadata.csv) to group cells by source sample in the application; see the [publication guide](../../docs/PUBLICATION_FIGURES.md).
+
+To reproduce this figure from the repository root, run `Rscript --vanilla case-studies/ck-p25/export_publication_figure.R`. The script checks the heatmap values against the recorded expression table and the confusion counts against the archived classifier output before writing the figure and bundle. It records the current package environment in `publication_sessionInfo.txt`. Classification uses the leading 20 selected genes and seed 20260908.
+
+## Recorded selection results and earlier figure
 
 The all-cell run returned 302 genes from 1,860 mapped inputs, an 83.8% reduction. Anxa3, Arid1a, Gng10 and Tanc2 each had a reported score of 307. Scores define the returned ranking and are not fold changes, p-values or associations with disease labels. Ties retain the implementation's returned order.
 
@@ -63,4 +73,4 @@ Enrichr reference: Kuleshov et al. (2016), [10.1093/nar/gkw377](https://doi.org/
 
 CSV files contain cell metadata, rankings, excluded names, plotted values and all pathway test results. The two RDS files preserve mapped input, selection output and metadata for both runs. `SHA256SUMS.csv` records relative-path checksums for the distributed artifacts. The archived GMT and GEO-derived values retain their respective source attribution; the application's code license does not replace source-data terms.
 
-The example demonstrates gene selection and inspection with a supplied dataset. It provides no measured speed comparison, classification benchmark or validation in independent animals. The manuscript draft is not included in this public repository.
+The example demonstrates gene selection, expression inspection and within-dataset classification with a supplied dataset. It provides no measured speed comparison, comparative classification benchmark or validation in independent animals. The manuscript draft is not included in this public repository.

@@ -43,6 +43,7 @@ libs <-c("shiny",
          "randomForest"
 )
 lapply(libs, require, character.only = TRUE)
+source("Scripts/PublicationUI.R", local = TRUE)
 
 
 
@@ -658,40 +659,7 @@ ui <- navbarPage(
           div(
             class = "section-card analysis-options",
             div(class = "section-heading", div(h2("Output settings"), p("Control the size and organization of the generated result set.")), icon("chart-column")),
-            div(
-              class = "analysis-options-grid",
-              div(
-                class = "form-block genes-count-control",
-                numericInput("genes", "Number of ranked genes", value = 100, min = 2, max = 500, step = 1, width = "100%")
-              ),
-              div(
-                class = "form-block",
-                h3("Generate heatmap"),
-                radioButtons("HeatMap1", label = NULL, choices = list("Yes" = TRUE, "No" = FALSE), selected = FALSE, inline = TRUE)
-              ),
-              div(
-                class = "form-block",
-                h3("Heatmap clustering"),
-                radioButtons(
-                  "clustering",
-                  label = NULL,
-                  choices = c("Between groups" = "cluster_between_groups", "None" = "None_Clustering"),
-                  selected = "None_Clustering",
-                  inline = TRUE
-                )
-              ),
-              div(
-                class = "form-block",
-                h3("Heatmap labels"),
-                radioButtons(
-                  "Split",
-                  label = NULL,
-                  choices = c("Predicted cell type" = "CellType", "Uploaded state" = "labels"),
-                  selected = "CellType",
-                  inline = TRUE
-                )
-              )
-            ),
+            numericInput("genes", "Number of ranked genes", value = 20, min = 2, max = 500, step = 1, width = "100%"),
             div(class = "inline-note", icon("triangle-exclamation"), span("Organism and gene ID settings from the upload step are reused here."))
           ),
           div(
@@ -707,7 +675,7 @@ ui <- navbarPage(
               selectInput(
                 "downloadDpi", NULL,
                 choices = c("300 dpi" = "300", "600 dpi" = "600"),
-                selected = "300"
+                selected = "600"
               ),
               conditionalPanel(
                 condition = "!output.analysisReady",
@@ -719,7 +687,7 @@ ui <- navbarPage(
                   "downloadData",
                   tagList(icon("download"), " Download results"),
                   class = "btn btn-secondary",
-                  title = "Bundles the filtered gene table, expression heatmap and k-NN plot as a .zip"
+                  title = "Download all four panels and composite as PDF/PNG, plotted values, predictions and settings"
                 )
               ),
               actionButton(
@@ -743,7 +711,7 @@ ui <- navbarPage(
               class = "empty-state analysis-empty-state",
               div(class = "empty-state-icon", icon("flask")),
               h3("Results will appear after analysis"),
-              p("Select a method, review the output settings and run the analysis to generate ranked biomarkers, validation metrics and optional heatmaps.")
+              p("Select a method, review the output settings and run the analysis to generate ranked genes, expression plots and within-dataset classification.")
             )
           ),
           conditionalPanel(
@@ -754,7 +722,7 @@ ui <- navbarPage(
                 class = "results-grid biomarkers-grid",
                 div(
                   class = "result-card result-card-wide",
-                  div(class = "result-card-heading", div(h2("Ranked biomarkers"), p("Genes ordered by their combined selection score.")), icon("ranking-star")),
+                  div(class = "result-card-heading", div(h2("Ranked genes"), p("Genes ordered by the selected method's score.")), icon("ranking-star")),
                   girafeOutput("TheBarPlot", height = "460px")
                 ),
                 div(
@@ -763,42 +731,7 @@ ui <- navbarPage(
                   DT::dataTableOutput("GenesList")
                 )
               ),
-              div(
-                class = "result-card result-card-full",
-                div(class = "result-card-heading", div(h2("k-NN classification"), p("Predictive performance using only the selected genes.")), icon("bullseye")),
-                plotOutput("KnnClassifier", height = "460px")
-              ),
-              conditionalPanel(
-                condition = "input.HeatMap1 == 'TRUE'",
-                div(
-                  class = "results-grid heatmap-grid",
-                  div(
-                    class = "result-card result-card-wide",
-                    div(
-                      class = "result-card-heading",
-                      div(h2("Expression heatmap"), p("Selected-gene expression across cells and groups.")),
-                      div(
-                        class = "result-card-heading-actions",
-                        icon("grip"),
-                        tags$button(
-                          type = "button",
-                          class = "fullscreen-btn",
-                          `data-target` = "HeatMap",
-                          `aria-label` = "View the expression heatmap full screen",
-                          title = "View full screen",
-                          icon("up-right-and-down-left-from-center")
-                        )
-                      )
-                    ),
-                    plotOutput("HeatMap", height = "520px")
-                  ),
-                  div(
-                    class = "result-card result-list-card",
-                    div(class = "result-card-heading", div(h2("Heatmap genes"), p("Genes included in the visualization.")), icon("list")),
-                    DT::dataTableOutput("HeatmapList")
-                  )
-                )
-              )
+              publication_results_ui()
             )
           )
         )
@@ -918,7 +851,7 @@ ui <- navbarPage(
               selectInput(
                 "enrichmentDpi", NULL,
                 choices = c("300 dpi" = "300", "600 dpi" = "600"),
-                selected = "300"
+                selected = "600"
               ),
               downloadLink(
                 "downloadEnrichment",

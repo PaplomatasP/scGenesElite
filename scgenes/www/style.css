@@ -951,3 +951,16 @@ table.dataTable tbody tr:hover,
   *::before,
   *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+/* Publication workspace: use the app's existing cards and navy/blue palette. */
+.publication-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.publication-export-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin-top: 24px; }
+.publication-export-bar > .form-group { min-width: 155px; flex: 1; margin-bottom: 0; }
+.publication-export-bar > .btn { margin-bottom: 0; }
+.publication-panels { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin: 22px 0; }
+.publication-panels .result-card { min-width: 0; overflow-x: auto; }
+.publication-panels h3 { color: #18243b; font-size: 16px; margin: 0 0 14px; }
+.publication-help { font-size: 13px; line-height: 1.6; color: #526178; margin-top: 12px; }
+.publication-composite { margin-top: 22px; overflow-x: auto; border-top: 1px solid #e2e8f0; padding-top: 18px; }
+.publication-composite .shiny-plot-output { min-width: 660px; }
+.publication-details summary { cursor: pointer; font-weight: 600; color: #18243b; }
+@media (max-width: 900px) { .publication-controls { grid-template-columns: minmax(0,1fr); gap: 4px; } }
